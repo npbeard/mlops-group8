@@ -1,10 +1,40 @@
-# MLOps Project Configuration
-# This file will eventually control paths, hyperparameters, and toggles.
+# MLOps Project Configuration: Group 8 Spotify Popularity Predictor
 
-data:
-  raw: "data/raw/dataset.csv"
-  processed: "data/processed/clean.csv"
+project:
+  name: "Spotify Sound Archetypes"
+  problem_type: "regression"
+  target_column: "popularity"
+
+paths:
+  raw_data: "data/raw/SpotifyAudioFeaturesApril2019.csv"
+  clean_data: "data/processed/clean.csv"
+  model_path: "models/model.joblib"
+  report_path: "reports/predictions.csv"
 
 train:
   test_size: 0.2
   seed: 42
+  # Model hyperparameters
+  rf_n_estimators: 100
+  rf_max_depth: 10
+
+features:
+  # Handle non-linear time/tempo effects
+  quantile_bin: 
+    - "duration_ms"
+    - "tempo"
+  # Encode categorical identifiers
+  categorical_onehot: 
+    - "key"
+    - "mode"
+  # Standardize raw audio signals
+  numeric_passthrough: 
+    - "acousticness"
+    - "danceability"
+    - "energy"
+    - "instrumentalness"
+    - "liveness"
+    - "loudness"
+    - "speechiness"
+    - "valence"
+  n_bins: 5
