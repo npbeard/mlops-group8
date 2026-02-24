@@ -19,25 +19,6 @@ def get_feature_preprocessor(
     - Encapsulating logic in a ColumnTransformer prevents data leakage by ensuring the same rules apply to test/live data.
     """
     print("Building feature preprocessor recipe...") # TODO: replace with logging later
-    
-    transformers = []
-
-    if quantile_bin_cols:
-        transformers.append(
-            ("quantile_bins", KBinsDiscretizer(n_bins=n_bins, encode="ordinal"), quantile_bin_cols)
-        )
-
-    if categorical_onehot_cols:
-        try:
-            # Modern scikit-learn
-            ohe = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
-        except TypeError:
-            # Older versions
-            ohe = OneHotEncoder(handle_unknown="ignore", sparse=False)
-        transformers.append(("cat_ohe", ohe, categorical_onehot_cols))
-
-    if numeric_passthrough_cols:
-        transformers.append(("num_pass", StandardScaler(), numeric_passthrough_cols))
 
     # --------------------------------------------------------
     # START STUDENT CODE

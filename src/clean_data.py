@@ -25,19 +25,18 @@ def clean_dataframe(df_raw: pd.DataFrame, target_column: str) -> pd.DataFrame:
     # START STUDENT CODE
     # --------------------------------------------------------
     # 1. Remove duplicate tracks to prevent leakage (tracks appearing in both train/test)
-    df_clean = df_raw.drop_duplicates(subset=['track_id'])
+    df_clean = df_clean.drop_duplicates()
 
     # 2. Filter out "Non-Musical" content (Speechiness > 0.66 usually indicates spoken word)
     # This helps the model focus on actual songs as identified in Group 8 EDA.
-    df_clean = df_clean[df_clean['speechiness'] < 0.66]
+    if "speechiness" not in df_clean.columns:
+        raise KeyError("Expected column 'speechiness' not found in input dataframe.")
+    df_clean = df_clean[df_clean["speechiness"] < 0.66]
 
     # 3. Handle 0-length tracks if any exist
-    df_clean = df_clean[df_clean['duration_ms'] > 0]
-
-    # 4. Handle missing values in audio features
-    # Spotify data is usually clean, but we fill numeric NaNs with the median just in case.
-    numeric_cols = df_clean.select_dtypes(include=['number']).columns
-    df_clean[numeric_cols] = df_clean[numeric_cols].fillna(df_clean[numeric_cols].median())
+    if "duration_ms" not in df_clean.columns:
+        raise KeyError("Expected column 'duration_ms' not found in input dataframe.")
+    df_clean = df_clean[df_clean["duration_ms"] > 0]
 
     return df_clean
     # --------------------------------------------------------

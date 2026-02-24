@@ -8,7 +8,7 @@ Output: Metrics dictionary and plots saved to `reports/`.
 
 import pandas as pd
 import numpy as np
-from sklearn.metrics import mean_squared_error, f1_score
+from sklearn.metrics import mean_squared_error, f1_score, mean_absolute_error
 
 def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, problem_type: str) -> float:
     """
@@ -24,13 +24,6 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, problem_type:
     print("Evaluating model performance...") # TODO: replace with logging later
     
     preds = model.predict(X_test)
-    
-    if problem_type == "regression":
-        metric = np.sqrt(mean_squared_error(y_test, preds))
-        print(f"Metric (RMSE): {metric}")
-    else:
-        metric = f1_score(y_test, preds, average='weighted')
-        print(f"Metric (F1 Weighted): {metric}")
 
     # --------------------------------------------------------
     # START STUDENT CODE
@@ -41,9 +34,16 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, problem_type:
     # 1. classification_report(y_test, preds)
     # 2. mean_absolute_percentage_error(y_test, preds)
     if problem_type == "regression":
-        from sklearn.metrics import mean_absolute_error
-        mae = mean_absolute_error(y_test, preds)
+        rmse = float(np.sqrt(mean_squared_error(y_test, preds)))
+        mae = float(mean_absolute_error(y_test, preds))
+        print(f"Metric (RMSE): {rmse}")
         print(f"Additional Metric (MAE): {mae}")
+        return {"rmse": rmse, "mae": mae}
+
+    # classification
+    f1 = float(f1_score(y_test, preds, average="weighted"))
+    print(f"Metric (F1 Weighted): {f1}")
+    return {"f1_weighted": f1}
     # --------------------------------------------------------
     # END STUDENT CODE
     # --------------------------------------------------------

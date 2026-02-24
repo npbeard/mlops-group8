@@ -1,14 +1,7 @@
-"""
-Educational Goal:
-- Why this module exists in an MLOps system: Centralizes I/O logic to ensure consistent data handling across the pipeline.
-- Responsibility (separation of concerns): Handles reading/writing files and model serialization.
-- Pipeline contract (inputs and outputs): Takes file paths and objects; returns loaded data or saves to disk.
-
-TODO: Replace print statements with standard library logging in a later session
-TODO: Any temporary or hardcoded variable or parameter will be imported from config.yml in a later session
-"""
 import pandas as pd
 import joblib
+from pathlib import Path
+import json
 from pathlib import Path
 
 def load_csv(filepath: Path) -> pd.DataFrame:
@@ -90,3 +83,9 @@ def load_model(filepath: Path):
     # --------------------------------------------------------
     # END STUDENT CODE
     # --------------------------------------------------------
+
+def save_json(obj: dict, filepath: Path) -> None:
+    print(f"Saving JSON to {filepath}")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(obj, f, indent=2, sort_keys=True)

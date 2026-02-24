@@ -17,7 +17,7 @@ import src.features as features
 import src.train as train
 import src.evaluate as evaluate
 import src.infer as infer
-from src.utils import save_csv, save_model
+from src.utils import save_csv, save_json, save_model
 
 def load_config(config_path: str):
     with open(config_path, 'r') as f:
@@ -48,7 +48,12 @@ def main():
         SETTINGS["features"]["numeric_passthrough"] + 
         [SETTINGS["project"]["target_column"]]
     )
-    validate.validate_dataframe(df_clean, required_cols)
+    validate.validate_dataframe(
+        df_clean,
+        required_cols,
+        target_column=SETTINGS["project"]["target_column"],
+        allow_feature_nulls=True
+    )
     
     # 5. Split
     target = SETTINGS["project"]["target_column"]
@@ -75,14 +80,20 @@ def main():
     
     # 7. Train
     model_pipeline = train.train_model(
-        X_train, y_train, preprocessor, SETTINGS["project"]["problem_type"]
+        X_train,
+        y_train,
+        preprocessor,
+        SETTINGS["project"]["problem_type"],
+        train_config=SETTINGS.get("train", {}),
     )
     save_model(model_pipeline, Path(SETTINGS["paths"]["model_path"]))
     
     # 8. Evaluate
-    evaluate.evaluate_model(
+    metrics = evaluate.evaluate_model(
         model_pipeline, X_test, y_test, SETTINGS["project"]["problem_type"]
     )
+    save_json(metrics, Path("reports/metrics.json"))
+    save_json(SETTINGS, Path("reports/run_config.json"))
     
     # 9. Inference
     df_preds = infer.run_inference(model_pipeline, X_test)

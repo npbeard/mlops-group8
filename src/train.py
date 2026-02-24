@@ -11,7 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import Ridge, LogisticRegression
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 
-def train_model(X_train: pd.DataFrame, y_train: pd.Series, preprocessor, problem_type: str):
+def train_model(X_train: pd.DataFrame, y_train: pd.Series, preprocessor, problem_type: str, train_config: dict | None = None):
     """
     Inputs:
     - X_train, y_train: Training features and target.
@@ -24,11 +24,6 @@ def train_model(X_train: pd.DataFrame, y_train: pd.Series, preprocessor, problem
     """
     print(f"Training {problem_type} model...") # TODO: replace with logging later
 
-    if problem_type == "regression":
-        estimator = Ridge()
-    else:
-        estimator = LogisticRegression(max_iter=500)
-
     # --------------------------------------------------------
     # START STUDENT CODE
     # --------------------------------------------------------
@@ -37,16 +32,34 @@ def train_model(X_train: pd.DataFrame, y_train: pd.Series, preprocessor, problem
     # Examples:
     # 1. estimator = RandomForestClassifier(n_estimators=100)
     # 2. Add hyperparameter tuning (GridSearchCV)
-    if problem_type == "regression":
-        # Improved Ridge (Good for interpretability)
-        # estimator = Ridge(alpha=1.0) 
+    train_config = train_config or {}
 
-        # Random Forest (Better for handling 'sound archetypes' and non-linearity)
-        estimator = RandomForestRegressor(n_estimators=100, max_depth=10, random_state=42)
-        
+    seed = train_config.get("seed", 42)
+    rf_n_estimators = train_config.get("rf_n_estimators", 100)
+    rf_max_depth = train_config.get("rf_max_depth", 10)
+    baseline_model = train_config.get("baseline_model", "rf")  # optional
+
+    # Choose model
+    if baseline_model == "ridge" and problem_type == "regression":
+        estimator = Ridge(alpha=float(train_config.get("ridge_alpha", 1.0)))
+    elif baseline_model == "logreg" and problem_type != "regression":
+        estimator = LogisticRegression(max_iter=int(train_config.get("logreg_max_iter", 500)))
     else:
-        # For classification (e.g., predicting 'is_hit'), RF is also superior
-        estimator = RandomForestClassifier(n_estimators=100, random_state=42)
+        # Default: Random Forest
+        if problem_type == "regression":
+            estimator = RandomForestRegressor(
+                n_estimators=int(rf_n_estimators),
+                max_depth=int(rf_max_depth) if rf_max_depth is not None else None,
+                random_state=int(seed),
+                n_jobs=-1,
+            )
+        else:
+            estimator = RandomForestClassifier(
+                n_estimators=int(rf_n_estimators),
+                max_depth=int(rf_max_depth) if rf_max_depth is not None else None,
+                random_state=int(seed),
+                n_jobs=-1,
+            )
     # --------------------------------------------------------
     # END STUDENT CODE
     # --------------------------------------------------------
