@@ -2,7 +2,7 @@
 Module: Main Pipeline
 ---------------------
 Role: Orchestrate the entire flow (Load -> Clean -> Validate -> Train -> Evaluate).
-Usage: python src/main.py
+Usage: python -m src.main
 """
 
 from pathlib import Path
