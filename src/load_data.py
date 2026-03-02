@@ -14,6 +14,8 @@ Educational Goal:
 TODO: Replace print statements with standard library logging in a later session
 TODO: Any temporary or hardcoded variable or parameter will be imported from config.yml in a later session
 """
+
+
 import pandas as pd
 from pathlib import Path
 import logging
