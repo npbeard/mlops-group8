@@ -14,41 +14,42 @@ Educational Goal:
 TODO: Replace print statements with standard library logging in a later session
 TODO: Any temporary or hardcoded variable or parameter will be imported from config.yml in a later session
 """
+
+
 import pandas as pd
 from pathlib import Path
+import logging
 from src.utils import load_csv, save_csv
 
-def load_raw_data(raw_data_path: Path) -> pd.DataFrame:
-    """
-    Inputs:
-    - raw_data_path: Path to the raw data file.
-    Outputs:
-    - pd.DataFrame: The loaded raw dataset.
-    Why this contract matters for reliable ML delivery:
-    - Guarantees that the pipeline starts with a consistent data structure.
-    """
-    print(f"Loading raw data from {raw_data_path}") # TODO: replace with logging later
-    
-    if not raw_data_path.exists():
-        print("!!! LOUD WARNING: Raw data file not found !!!")
-        print("Creating a DUMMY dataset for scaffolding purposes only.")
-        dummy_df = pd.DataFrame({
-            "num_feature": [1.0, 2.5, 3.2, 4.8, 5.1, 0.5, 1.2, 3.3, 4.1, 2.9],
-            "cat_feature": ["A", "B", "A", "C", "B", "A", "C", "B", "A", "C"],
-            "target": [10, 20, 15, 30, 25, 12, 28, 22, 14, 27]
-        })
-        save_csv(dummy_df, raw_data_path)
-        print("Note: Update your SETTINGS in main.py once you replace this dummy data.")
+logging.basicConfig(
+    filename="mlops.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+)
 
-    # --------------------------------------------------------
-    # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT: Paste your notebook logic here to replace or extend the baseline
-    # Why: You might need to merge multiple files or fetch data from a SQL database.
-    # Examples:
-    # 1. pd.concat([df1, df2])
-    # 2. sql_engine.connect()
-    return load_csv(raw_data_path)
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
+logger = logging.getLogger(__name__)
+
+def load_raw_data(raw_data_path: Path) -> pd.DataFrame:
+    logger.info(f"Attempting to load raw data from {raw_data_path}")
+
+    try:
+        if not raw_data_path.exists():
+            logger.warning("Raw data file not found. Creating dummy dataset.")
+
+            dummy_df = pd.DataFrame({
+                "num_feature": [1.0, 2.5, 3.2, 4.8, 5.1, 0.5, 1.2, 3.3, 4.1, 2.9],
+                "cat_feature": ["A", "B", "A", "C", "B", "A", "C", "B", "A", "C"],
+                "target": [10, 20, 15, 30, 25, 12, 28, 22, 14, 27]
+            })
+
+            save_csv(dummy_df, raw_data_path)
+            logger.info("Dummy dataset created and saved.")
+
+        data = load_csv(raw_data_path)
+        logger.info("Raw data loaded successfully.")
+
+        return data
+
+    except Exception as e:
+        logger.error(f"Error occurred while loading raw data: {e}")
+        raise
