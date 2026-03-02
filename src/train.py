@@ -10,6 +10,8 @@ import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import Ridge, LogisticRegression
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
+import logging
+logger = logging.getLogger(__name__)
 
 def train_model(X_train: pd.DataFrame, y_train: pd.Series, preprocessor, problem_type: str, train_config: dict | None = None):
     """
@@ -22,7 +24,7 @@ def train_model(X_train: pd.DataFrame, y_train: pd.Series, preprocessor, problem
     Why this contract matters for reliable ML delivery:
     - Using a Pipeline ensures that preprocessing and modeling are bundled into a single atomic object.
     """
-    print(f"Training {problem_type} model...") # TODO: replace with logging later
+    logger.info("Training %s model...", problem_type)
 
     # --------------------------------------------------------
     # START STUDENT CODE

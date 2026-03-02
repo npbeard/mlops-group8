@@ -7,6 +7,8 @@ Output: Boolean (True if valid) or raises Error.
 """
 
 import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
 
 def validate_dataframe(df: pd.DataFrame, required_columns: list, target_column: str, allow_feature_nulls: bool = True) -> bool:
     """
@@ -18,7 +20,7 @@ def validate_dataframe(df: pd.DataFrame, required_columns: list, target_column: 
     Why this contract matters for reliable ML delivery:
     - If data is empty or corrupted, we should stop the pipeline before wasting compute or deploying bad models.
     """
-    print("Validating data schema...") # TODO: replace with logging later
+    logger.info("Validating data schema...")
 
     if df.empty:
         raise ValueError("Validation Failed: The provided DataFrame is empty.")
@@ -56,16 +58,19 @@ def validate_dataframe(df: pd.DataFrame, required_columns: list, target_column: 
         if allow_feature_nulls:
             # Pipeline imputes; warn but don't fail
             null_counts = {c: int(df[c].isnull().sum()) for c in feature_null_cols}
-            print(f"Warning: Nulls found in feature columns (will be imputed in Pipeline): {null_counts}")
+            logger.warning(
+    "Nulls found in feature columns (will be imputed in Pipeline): %s",
+        null_counts,
+)
         else:
             raise ValueError(f"Validation Failed: Nulls found in feature columns {feature_null_cols}")
 
     # Basic target sanity check (if numeric)
     if pd.api.types.is_numeric_dtype(df[target_column]):
         if not df[target_column].between(0, 100).all():
-            print(f"Warning: Some '{target_column}' values are outside the 0-100 range.")
+            logger.warning("Some '%s' values are outside the 0-100 range.", target_column)
     
-    print("Schema and Null-check validation passed.")
+    logger.info("Schema and null-check validation passed.")
     return True
     # --------------------------------------------------------
     # END STUDENT CODE
