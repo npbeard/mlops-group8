@@ -39,7 +39,6 @@ def get_feature_preprocessor(
                     n_bins=n_bins, 
                     encode="ordinal", 
                     strategy='quantile',
-                    quantile_method='linear'
                 ), 
                 quantile_bin_cols
             )
