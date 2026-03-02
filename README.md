@@ -1,7 +1,7 @@
-# Spotify Track Popularity Prediction Pipeline
+# Spotify Sound Archetype Discovery
 
-**Author:** Group 8  
-**Course:** MLOps: Master in Business Analytics and Data Science  
+**Author:** Group 8 
+**Course:** MLOPS: Master in Business Analytics and Data Science
 **Status:** Session 1 (Initialization)
 
 ---
@@ -9,62 +9,35 @@
 ## 1. Business Objective
 
 * **The Goal:**  
-  Predict the popularity score of Spotify tracks using audio features to better understand the key characteristics of successful songs. This model can help music producers, record labels, and streaming platforms identify high-potential tracks and optimize production and promotion strategies.
+  *Identify distinct clusters of songs based purely on audio features (e.g., energy, danceability, valence, tempo) and evaluate whether these clusters reveal interpretable musical archetypes and differences in popularity.
 
-* **The User:**  
-  Music analysts, producers, and platform analysts consume the output as a structured predictions file (`reports/predictions.csv`) that estimates expected popularity based on track audio features. This enables data-driven decision-making for music production, recommendation systems, and content strategy.
+  Discover data-driven sound segments that could support improved music recommendation systems, playlist curation strategies, and audience targeting decisions.*
+
+* **The User:** Who consumes the output and how?
+  > *The primary users of this analysis are music streaming product teams, data scientists working on recommendation systems, and music analytics teams.
+  
+  They would use cluster assignments and visualizations to segment tracks based on measurable sound characteristics independent of genre labels, and evaluate how different sound profiles relate to popularity and engagement.*
 
 ---
 
 ## 2. Success Metrics
 
-* **Business KPI (The "Why"):**  
-  Enable data-driven identification of high-potential songs, improving decision-making efficiency for music production and promotion. Success is measured by the model’s ability to reliably differentiate higher- vs lower-popularity tracks based on audio features.
+* **Business KPI (The "Why"):**
+  > *Increase average playlist listening time by 3–5% by identifying and promoting high-performing sound archetypes within recommendation strategies.*
 
-* **Technical Metric (The "How"):**  
-  Root Mean Squared Error (RMSE) on the test set. Current baseline performance:
+* **Technical Metric (The "How"):**
+  > *Achieve a Silhouette Score ≥ 0.25 to ensure meaningful cluster separation, and retain ≥ 60% cumulative explained variance through PCA to preserve the majority of information in reduced feature space.*
 
-  - RMSE ≈ 18.1  
-  - MAE ≈ 14.8  
-
-* **Acceptance Criteria:**  
-  - The pipeline runs end-to-end via `python -m src.main` without errors  
-  - The model produces reproducible predictions  
-  - The pipeline is leakage-safe (all preprocessing occurs inside the sklearn Pipeline and is fit on training data only)  
-  - Required artifacts are generated:
-    - `data/processed/clean.csv`
-    - `models/model.joblib`
-    - `reports/predictions.csv`
-    - `reports/metrics.json`
+* **Acceptance Criteria:**
+  > *The clustering solution must achieve a Silhouette Score ≥ 0.25, retain ≥ 60% cumulative explained variance through PCA, and demonstrate statistically significant differences in average popularity across at least two identified sound archetypes.*
 
 ---
 
 ## 3. The Data
 
-* **Source:**  
-  Spotify Audio Features dataset (`SpotifyAudioFeaturesApril2019.csv`), provided as a CSV file.
-
-* **Target Variable:**  
-  `popularity` — a numeric score (0–100) representing the popularity of a track on Spotify.
-
-* **Features Used:**  
-  Audio characteristics such as:
-
-  - danceability  
-  - energy  
-  - loudness  
-  - tempo  
-  - speechiness  
-  - acousticness  
-  - instrumentalness  
-  - valence  
-  - duration_ms  
-  - key, mode, and other audio descriptors  
-
-* **Sensitive Info:**  
-  This dataset contains **no personally identifiable information (PII)**. It consists only of track metadata and audio features.
-
-  ⚠️ The `data/`, `models/`, and generated artifacts are excluded from version control via `.gitignore` to follow best practices.
+* **Source:** SpotifyAudioFeaturesApril2019 (Kaggle)
+* **Target Variable:** This is an unsupervised learning task; therefore, no prediction target is defined. The popularity variable (0–100) is used post-clustering to evaluate differences in commercial performance across identified sound archetypes.
+* **Sensitive Info:** The dataset does not contain personally identifiable information (PII) such as names, emails, or payment details.
 
 ---
 
@@ -74,42 +47,35 @@ This project follows a strict separation between "Sandbox" (Notebooks) and "Prod
 
 ```text
 .
-├── README.md
-├── environment.yml
-├── config.yaml
-├── .env
+├── README.md                # This file (Project definition)
+├── environment.yml          # Dependencies (Conda/Pip)
+├── config.yaml              # Global configuration (paths, params)
+├── .env                     # Secrets placeholder
 │
-├── notebooks/
-│   └── Final_Assignment.ipynb
+├── notebooks/               # Experimental sandbox
+│   └── yourbaseline.ipynb   # From previous work
 │
-├── src/
-│   ├── __init__.py
-│   ├── load_data.py
-│   ├── clean_data.py
-│   ├── validate.py
-│   ├── features.py
-│   ├── train.py
-│   ├── evaluate.py
-│   ├── infer.py
-│   ├── utils.py
-│   └── main.py
+├── src/                     # Production code (The "Factory")
+│   ├── __init__.py          # Python package
+│   ├── load_data.py         # Ingest raw data
+│   ├── clean_data.py        # Preprocessing & cleaning
+│   ├── features.py          # Feature engineering
+│   ├── validate.py          # Data quality checks
+│   ├── train.py             # Model training & saving
+│   ├── evaluate.py          # Metrics & plotting
+│   ├── infer.py             # Inference logic
+│   └── main.py              # Pipeline orchestrator
 │
-├── data/
-│   ├── raw/
-│   │   └── SpotifyAudioFeaturesApril2019.csv
-│   ├── processed/
-│   │   └── clean.csv
-│   └── inference/
+├── data/                    # Local storage (IGNORED by Git)
+│   ├── raw/                 # Immutable input data
+│   └── processed/           # Cleaned data ready for training
 │
-├── models/
-│   └── model.joblib
+├── models/                  # Serialized artifacts (IGNORED by Git)
 │
-├── reports/
-│   ├── predictions.csv
-│   ├── metrics.json
-│   └── run_config.json
+├── reports/                 # Generated metrics, plots, and figures
 │
-└── tests/
+└── tests/                   # Automated tests
+```
 
 ## 5. Execution Model
 
