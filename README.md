@@ -1,4 +1,4 @@
-# Spotify Sound Archetype Discovery
+# Spotify Popularity Prediction Pipeline
 
 **Author:** Group 8  
 **Course:** MLOps: Master in Business Analytics and Data Science  
@@ -9,35 +9,39 @@
 ## 1. Business Objective
 
 * **The Goal:**  
-  Identify distinct clusters of songs based purely on audio features (e.g., energy, danceability, valence, tempo) and evaluate whether these clusters reveal interpretable musical archetypes and differences in popularity.  
+  Develop a supervised machine learning model to predict Spotify track popularity (0–100) using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness.
 
-  Discover data-driven sound segments that could support improved music recommendation systems, playlist curation strategies, and audience targeting decisions.
+  The objective is to identify which audio characteristics are most strongly associated with higher popularity and to build a predictive system that supports data-driven ranking and promotion decisions.
 
 * **The User:**  
-  The primary users of this analysis are music streaming product teams, data scientists working on recommendation systems, and music analytics teams.  
+  The primary users of this model are music streaming product teams, recommendation system engineers, and music analytics teams.
 
-  They would use cluster assignments and visualizations to segment tracks based on measurable sound characteristics independent of genre labels, and evaluate how different sound profiles relate to popularity and engagement.
+  They would use predicted popularity scores to prioritize tracks within recommendation systems, optimize playlist ordering, and better understand the relationship between audio features and user engagement.
 
 ---
 
 ## 2. Success Metrics
 
 * **Business KPI (The "Why"):**  
-  Increase average playlist listening time by 3–5% by identifying and promoting high-performing sound archetypes within recommendation strategies.
+  Improve recommendation and playlist engagement metrics by enabling more accurate ranking of tracks, with a target uplift of 3–5% in average listening time or track completion rate.
 
 * **Technical Metric (The "How"):**  
-  Achieve a Silhouette Score ≥ 0.25 to ensure meaningful cluster separation, and retain ≥ 60% cumulative explained variance through PCA to preserve the majority of information in reduced feature space.
+  Achieve an RMSE that outperforms a baseline model (e.g., mean predictor or simple linear regression) and maintain stable MAE performance across validation splits.
 
 * **Acceptance Criteria:**  
-  The clustering solution must achieve a Silhouette Score ≥ 0.25, retain ≥ 60% cumulative explained variance through PCA, and demonstrate statistically significant differences in average popularity across at least two identified sound archetypes.
+  The model must outperform a defined baseline on RMSE and MAE, demonstrate stable performance across validation data, and produce reproducible predictions through the end-to-end pipeline executed via `src.main`.
 
 ---
 
 ## 3. The Data
 
-* **Source:** SpotifyAudioFeaturesApril2019 (Kaggle)  
-* **Target Variable:** This is an unsupervised learning task; therefore, no prediction target is defined. The popularity variable (0–100) is used post-clustering to evaluate differences in commercial performance across identified sound archetypes.  
-* **Sensitive Info:** The dataset does not contain personally identifiable information (PII) such as names, emails, or payment details.
+* **Source:** SpotifyAudioFeaturesApril2019 (Kaggle)
+
+* **Target Variable:**  
+  `popularity` (numeric score from 0 to 100), representing the relative popularity of a track on Spotify.
+
+* **Sensitive Info:**  
+  The dataset does not contain personally identifiable information (PII). It consists solely of track-level audio features and metadata.
 
 ---
 
@@ -47,34 +51,34 @@ This project follows a strict separation between "Sandbox" (Notebooks) and "Prod
 
 ```text
 .
-├── README.md                # This file (Project definition)
+├── README.md                # Project definition
 ├── environment.yml          # Dependencies (Conda/Pip)
 ├── config.yaml              # Global configuration (paths, params)
 ├── .env                     # Secrets placeholder
 │
 ├── notebooks/               # Experimental sandbox
-│   └── yourbaseline.ipynb   # From previous work
+│   └── Final_Assignment.ipynb
 │
 ├── src/                     # Production code (The "Factory")
-│   ├── __init__.py          # Python package
-│   ├── load_data.py         # Ingest raw data
-│   ├── clean_data.py        # Preprocessing & cleaning
-│   ├── features.py          # Feature engineering
-│   ├── validate.py          # Data quality checks
-│   ├── train.py             # Model training & saving
-│   ├── evaluate.py          # Metrics & plotting
-│   ├── infer.py             # Inference logic
-│   └── main.py              # Pipeline orchestrator
+│   ├── __init__.py
+│   ├── load_data.py
+│   ├── clean_data.py
+│   ├── features.py
+│   ├── validate.py
+│   ├── train.py
+│   ├── evaluate.py
+│   ├── infer.py
+│   └── main.py
 │
 ├── data/                    # Local storage (IGNORED by Git)
-│   ├── raw/                 # Immutable input data
-│   └── processed/           # Cleaned data ready for training
+│   ├── raw/
+│   └── processed/
 │
-├── models/                  # Serialized artifacts (IGNORED by Git)
+├── models/                  # Serialized model artifacts (IGNORED by Git)
 │
-├── reports/                 # Generated metrics, plots, and figures
+├── reports/                 # Generated metrics, predictions, and configs
 │
-└── tests/                   # Automated tests
+└── tests/                   # Automated test suite
 ```
 
 ## 5. Execution Model
