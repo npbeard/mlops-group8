@@ -5,7 +5,8 @@ Role: Make predictions on new, unseen data.
 Input: Trained Model + New Data.
 Output: Predictions (Array or DataFrame).
 """
-
+import logging
+logger = logging.getLogger(__name__)
 import pandas as pd
 import numpy as np
 
@@ -19,7 +20,7 @@ def run_inference(model, X_infer: pd.DataFrame) -> pd.DataFrame:
     Why this contract matters for reliable ML delivery:
     - Separation of training and inference ensures that production code is lightweight and focused.
     """
-    print("Running inference on new data...") # TODO: replace with logging later
+    logger.info("Running inference on new data...")
     
     preds = model.predict(X_infer)
 

@@ -4,7 +4,9 @@ Module: Main Pipeline
 Role: Orchestrate the entire flow (Load -> Clean -> Validate -> Train -> Evaluate).
 Usage: python -m src.main
 """
-
+import logging
+from src.utils import setup_logging
+logger = logging.getLogger(__name__)
 from pathlib import Path
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -26,8 +28,16 @@ def load_config(config_path: str):
 # Load the external configuration
 SETTINGS = load_config("config.yaml")
 
+setup_logging(
+    level=SETTINGS.get("logging", {}).get("level", "INFO"),
+    log_file=SETTINGS.get("logging", {}).get("file"),
+)
+
 def main():
-    print(f"--- Starting MLOps Pipeline: {SETTINGS['project']['name']} ---")
+    logger.info(
+    "--- Starting MLOps Pipeline: %s ---",
+    SETTINGS["project"]["name"],
+)
     
     # 1. Infrastructure Setup
     for folder in ["data/raw", "data/processed", "models", "reports"]:
@@ -99,7 +109,7 @@ def main():
     df_preds = infer.run_inference(model_pipeline, X_test)
     save_csv(df_preds, Path(SETTINGS["paths"]["report_path"]))
     
-    print("--- Pipeline Completed Successfully ---")
+    logger.info("--- Pipeline Completed Successfully ---")
 
 if __name__ == "__main__":
     main()

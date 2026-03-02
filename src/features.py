@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 from typing import Optional, List
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, KBinsDiscretizer, StandardScaler
@@ -18,7 +20,7 @@ def get_feature_preprocessor(
     Why this contract matters for reliable ML delivery:
     - Encapsulating logic in a ColumnTransformer prevents data leakage by ensuring the same rules apply to test/live data.
     """
-    print("Building feature preprocessor recipe...") # TODO: replace with logging later
+    logger.info("Building feature preprocessor recipe...")
 
     # --------------------------------------------------------
     # START STUDENT CODE
@@ -39,7 +41,6 @@ def get_feature_preprocessor(
                     n_bins=n_bins, 
                     encode="ordinal", 
                     strategy='quantile',
-                    quantile_method='linear'
                 ), 
                 quantile_bin_cols
             )

@@ -1,8 +1,35 @@
+import logging
+from pathlib import Path
+from typing import Optional
 import pandas as pd
 import joblib
 from pathlib import Path
 import json
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
+    root = logging.getLogger()
+    root.setLevel(level.upper())
+
+    if root.handlers:
+        return
+
+    formatter = logging.Formatter(
+        fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    console = logging.StreamHandler()
+    console.setFormatter(formatter)
+    root.addHandler(console)
+
+    if log_file:
+        Path(log_file).parent.mkdir(parents=True, exist_ok=True)
+        fh = logging.FileHandler(log_file, encoding="utf-8")
+        fh.setFormatter(formatter)
+        root.addHandler(fh)
 
 def load_csv(filepath: Path) -> pd.DataFrame:
     """
@@ -13,7 +40,7 @@ def load_csv(filepath: Path) -> pd.DataFrame:
     Why this contract matters for reliable ML delivery:
     - Provides a single point of failure and fix for data ingestion issues.
     """
-    print(f"Reading CSV from {filepath}") # TODO: replace with logging later
+    logger.info("Reading CSV from %s", filepath)
     # --------------------------------------------------------
     # START STUDENT CODE
     # --------------------------------------------------------
@@ -33,7 +60,7 @@ def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     Why this contract matters for reliable ML delivery:
     - Automatically handles directory creation to prevent pipeline crashes.
     """
-    print(f"Saving CSV to {filepath}") # TODO: replace with logging later
+    logger.info("Saving CSV to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     # --------------------------------------------------------
     # START STUDENT CODE
@@ -54,7 +81,7 @@ def save_model(model, filepath: Path) -> None:
     Why this contract matters for reliable ML delivery:
     - Ensures models are versioned and stored in a consistent format.
     """
-    print(f"Saving model to {filepath}") # TODO: replace with logging later
+    logger.info("Saving model to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     # --------------------------------------------------------
     # START STUDENT CODE
@@ -74,7 +101,7 @@ def load_model(filepath: Path):
     Why this contract matters for reliable ML delivery:
     - Simplifies loading for inference without repeating code.
     """
-    print(f"Loading model from {filepath}") # TODO: replace with logging later
+    logger.info("Loading model from %s", filepath)
     # --------------------------------------------------------
     # START STUDENT CODE
     # --------------------------------------------------------
@@ -85,7 +112,7 @@ def load_model(filepath: Path):
     # --------------------------------------------------------
 
 def save_json(obj: dict, filepath: Path) -> None:
-    print(f"Saving JSON to {filepath}")
+    logger.info("Saving JSON to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, sort_keys=True)

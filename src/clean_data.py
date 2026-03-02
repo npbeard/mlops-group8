@@ -7,6 +7,8 @@ Output: pandas.DataFrame (Processed/Clean).
 """
 
 import pandas as pd
+import logging
+logger = logging.getLogger(__name__)
 
 def clean_dataframe(df_raw: pd.DataFrame, target_column: str) -> pd.DataFrame:
     """
@@ -18,7 +20,7 @@ def clean_dataframe(df_raw: pd.DataFrame, target_column: str) -> pd.DataFrame:
     Why this contract matters for reliable ML delivery:
     - Prevents downstream errors caused by missing values or duplicate rows.
     """
-    print("Cleaning dataframe...") # TODO: replace with logging later
+    logger.info("Cleaning dataframe...")
     df_clean = df_raw.copy()
 
     # --------------------------------------------------------
