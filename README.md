@@ -89,34 +89,54 @@ This project follows a strict separation between "Sandbox" (Notebooks) and "Prod
 
 ```text
 .
+├── LICENSE
 ├── README.md                # Project definition
-├── environment.yml          # Dependencies (Conda/Pip)
 ├── config.yaml              # Global configuration (paths, params)
-├── .env                     # Secrets placeholder
+├── environment.yml          # Dependencies (Conda/Pip)
+├── mlops.log                # Pipeline / run logs
+├── pytest.ini               # Pytest configuration
+│
+├── data/                    # Local data storage
+│   ├── inference/           # Inputs/outputs for inference runs
+│   ├── processed/           # Clean/processed datasets
+│   │   └── clean.csv
+│   └── raw/                 # Original source data
+│       └── SpotifyAudioFeaturesApril2019.csv
+│
+├── models/                  # Serialized model artifacts
+│   └── model.joblib
 │
 ├── notebooks/               # Experimental sandbox
-│   └── Final_Assignment.ipynb
+│   ├── Final_Assignment.ipynb
+│   └── sandbox_pipeline_step_by_step.ipynb
+│
+├── reports/                 # Generated metrics, predictions, and configs
+│   ├── metrics.json
+│   ├── predictions.csv
+│   └── run_config.json
 │
 ├── src/                     # Production code (The "Factory")
 │   ├── __init__.py
-│   ├── load_data.py
 │   ├── clean_data.py
-│   ├── features.py
-│   ├── validate.py
-│   ├── train.py
 │   ├── evaluate.py
+│   ├── features.py
 │   ├── infer.py
-│   └── main.py
-│
-├── data/                    # Local storage (IGNORED by Git)
-│   ├── raw/
-│   └── processed/
-│
-├── models/                  # Serialized model artifacts (IGNORED by Git)
-│
-├── reports/                 # Generated metrics, predictions, and configs
+│   ├── load_data.py
+│   ├── main.py
+│   ├── train.py
+│   ├── utils.py
+│   └── validate.py
 │
 └── tests/                   # Automated test suite
+    ├── test_clean_data.py
+    ├── test_evaluate.py
+    ├── test_features.py
+    ├── test_infer.py
+    ├── test_load_data.py
+    ├── test_main.py
+    ├── test_train.py
+    ├── test_utils.py
+    └── test_validate.py
 ```
 
 ## 5. Execution Model
