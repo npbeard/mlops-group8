@@ -87,5 +87,6 @@ The full machine learning pipeline will eventually be executable through:
 
 `python -m src.main`
 
+To run tests/coverage:
 
-
+'pytest --cov=src --cov-report=term-missing'

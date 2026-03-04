@@ -1,7 +1,6 @@
 import pandas as pd
-import yaml
 from pathlib import Path
-
+import src.utils as utils_mod
 import src.main as main_mod
 
 
@@ -69,13 +68,26 @@ def test_main_pipeline_smoke(tmp_path, monkeypatch):
         "logging": {"level": "INFO", "file": None},
     }
 
+    # Redirect JSON outputs to tmp reports/
+    real_save_json = utils_mod.save_json
+
+    def save_json_to_tmp(obj, filepath: Path):
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        forced = reports_dir / filepath.name  # metrics.json / run_config.json
+        return real_save_json(obj, forced)
+
+    monkeypatch.setattr(main_mod, "save_json", save_json_to_tmp)
+
     # Monkeypatch SETTINGS used inside main.py
     monkeypatch.setattr(main_mod, "SETTINGS", settings)
 
+    # run pipeline
     main_mod.main()
 
-    # artifact checks
+    # artifact checks (all inside tmp_path)
     assert Path(settings["paths"]["clean_data"]).exists()
     assert Path(settings["paths"]["model_path"]).exists()
-    assert Path("reports/metrics.json").exists() or (reports_dir / "metrics.json").exists()
     assert Path(settings["paths"]["report_path"]).exists()
+
+    assert (reports_dir / "metrics.json").exists()
+    assert (reports_dir / "run_config.json").exists()
