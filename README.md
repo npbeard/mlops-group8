@@ -6,6 +6,44 @@
 
 ---
 
+## Business Case
+
+### Client & Industry
+The hypothetical client is a **music streaming platform (e.g., Spotify) within the digital music streaming industry**. The platform manages millions of tracks and must prioritize which songs appear in playlists, recommendations, and discovery feeds.
+
+### Problem Statement & KPI
+Music platforms must continuously decide **which tracks to promote or prioritize** in recommendations and playlists. Currently, ranking may rely heavily on historical engagement metrics or manual curation.
+
+The objective of this project is to **predict track popularity using measurable audio features**, enabling earlier identification of high-potential tracks. The success KPI is a **3–5% improvement in average listening time or track completion rate** through better ranking and promotion decisions.
+
+### Solution & Scalability
+The proposed solution is a **machine learning pipeline that predicts popularity scores from audio characteristics** such as danceability, energy, loudness, tempo, and valence.
+
+The pipeline is designed to scale by:
+- processing large music catalogs automatically,
+- retraining periodically as new data becomes available,
+- integrating predictions into recommendation systems or playlist ranking pipelines.
+
+### Benefit vs Non-AI Approach
+Traditional approaches rely on **historical engagement metrics or manual curation**, which can delay the discovery of emerging hits.
+
+A machine learning model can **identify promising tracks earlier using intrinsic audio properties**, enabling faster and more data-driven promotion decisions.
+
+### Estimated Costs
+A typical implementation could involve:
+- **Team:** 1 Data Scientist and 1 ML Engineer
+- **Timeline:** Approximately 4–6 weeks for initial development and deployment
+- **Infrastructure:** Cloud compute for training and batch inference, with costs depending on catalog size and retraining frequency.
+
+### Risks & Mitigations
+
+| Risk | Mitigation |
+|-----|-----|
+| Popularity bias toward already well-known tracks | Use diverse training data and monitor prediction distributions |
+| Data drift as music trends evolve | Implement periodic retraining and performance monitoring |
+| Overfitting to historical patterns | Apply validation splits, baselines, and regularization |
+| Misuse in recommendation ranking | Combine predictions with other engagement signals rather than relying solely on model output |
+
 ## 1. Business Objective
 
 * **The Goal:**  
@@ -89,4 +127,4 @@ The full machine learning pipeline will eventually be executable through:
 
 To run tests/coverage:
 
-'pytest --cov=src --cov-report=term-missing'
+`pytest --cov=src --cov-report=term-missing`
