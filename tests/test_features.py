@@ -1,6 +1,7 @@
-import pytest
-import pandas as pd
+import pandas as pd  # type: ignore
+
 from src.features import get_feature_preprocessor
+
 
 def test_get_feature_preprocessor_minimal():
     # construct dummy DataFrame
@@ -15,7 +16,9 @@ def test_get_feature_preprocessor_minimal():
         numeric_passthrough_cols=None,
         n_bins=2
     )
+    # use the dummy dataframe so it isn’t reported as unused
+    preprocessor.fit(df)
 
-    from sklearn.compose import ColumnTransformer
+    from sklearn.compose import ColumnTransformer  # type: ignore
     assert isinstance(preprocessor, ColumnTransformer)
     assert len(preprocessor.transformers) > 0

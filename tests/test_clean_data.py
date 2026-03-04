@@ -1,6 +1,7 @@
-import pytest
-import pandas as pd
+import pandas as pd  # type: ignore
+
 from src.clean_data import clean_dataframe
+
 
 def test_clean_dataframe_basic():
     # construct dummy DataFrame
@@ -12,10 +13,10 @@ def test_clean_dataframe_basic():
         "target": [10, 20, 30, 40]
     })
 
-    # call clean_dataframe 
+    # call clean_dataframe
     df_clean = clean_dataframe(df, target_column="target")
 
     assert isinstance(df_clean, pd.DataFrame)
     assert "speechiness" in df_clean.columns
     assert "duration_ms" in df_clean.columns
-    assert len(df_clean) <= len(df)  
+    assert len(df_clean) <= len(df)
