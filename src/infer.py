@@ -6,44 +6,33 @@ Input: Trained Model + New Data.
 Output: Predictions (Array or DataFrame).
 """
 import logging
-
-import numpy as np
 import pandas as pd  # type: ignore
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def run_inference(model, X_infer: pd.DataFrame) -> pd.DataFrame:
+def run_inference(model: Any, X_infer: pd.DataFrame) -> pd.DataFrame:
     """
     Inputs:
-    - model: The fitted Pipeline.
+    - model: The fitted Pipeline / estimator implementing .predict()
     - X_infer: New features to predict on.
     Outputs:
     - pd.DataFrame: A DataFrame with a single column "prediction".
-    Why this contract matters for reliable ML delivery:
-    - Separation of training and inference ensures
-    that production code is lightweight and focused.
     """
     logger.info("Running inference on new data...")
 
+    if not hasattr(model, "predict"):
+        raise TypeError("Model artifact must implement a .predict() method")
+
+    if not isinstance(X_infer, pd.DataFrame):
+        raise TypeError(f"X_infer must be a pandas.DataFrame, got {type(X_infer)}")
+
+    if X_infer.empty:
+        raise ValueError("X_infer is empty; cannot run inference")
+
     preds = model.predict(X_infer)
 
-    # ------------------------------
-    # START STUDENT CODE
-    # ------------------------------
-    # TODO_STUDENT: Paste your notebook logic here to
-    # replace or extend the baseline
-    # Why: You might need to post-process predictions
-    # (e.g., applying a threshold).
-    # Examples:
-    # 1. np.exp(preds) if you trained on log-target
-    # 2. (preds > 0.8).astype(int)
-    preds = np.clip(preds, 0, 100)
-
-    # Rounding to the nearest integer as Spotify uses whole numbers
-    preds = np.round(preds).astype(int)
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
-
-    return pd.DataFrame({"prediction": preds}, index=X_infer.index)
+    df_preds = pd.DataFrame({"prediction": preds})
+    logger.info("Inference complete. Generated %d predictions.", len(df_preds))
+    return df_preds

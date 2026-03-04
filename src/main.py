@@ -72,22 +72,44 @@ def main():
         allow_feature_nulls=True
     )
 
-    # 5. Split
+    # 5. Split (Train / Val / Test)
     target = SETTINGS["project"]["target_column"]
     X = df_clean.drop(columns=[target])
     y = df_clean[target]
 
-    # Accessing test_size and seed from the ['train'] block
-    strat = (
-        y
-        if SETTINGS["project"]["problem_type"] == "classification"
-        else None
+    test_size = SETTINGS["train"]["test_size"]
+    val_size = SETTINGS["train"].get("val_size", 0.2)
+    seed = SETTINGS["train"]["seed"]
+
+    # Stratify only makes sense for classification with discrete labels
+    strat = y if SETTINGS["project"]["problem_type"] == "classification" else None
+
+    # 5.1 Train+Val vs Test
+    X_trainval, X_test, y_trainval, y_test = train_test_split(
+        X,
+        y,
+        test_size=test_size,
+        random_state=seed,
+        stratify=strat,
     )
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=SETTINGS["train"]["test_size"],
-        random_state=SETTINGS["train"]["seed"],
-        stratify=strat
+
+    # 5.2 Train vs Val (val_size is fraction of trainval)
+    strat_trainval = (
+        y_trainval if SETTINGS["project"]["problem_type"] == "classification" else None
+    )
+    X_train, X_val, y_train, y_val = train_test_split(
+        X_trainval,
+        y_trainval,
+        test_size=val_size,
+        random_state=seed,
+        stratify=strat_trainval,
+    )
+
+    logger.info(
+        "Split sizes: train=%d (%.1f%%), val=%d (%.1f%%), test=%d (%.1f%%)",
+        len(X_train), 100 * len(X_train) / len(X),
+        len(X_val), 100 * len(X_val) / len(X),
+        len(X_test), 100 * len(X_test) / len(X),
     )
 
     # 6. Feature Engineering
@@ -107,17 +129,39 @@ def main():
         SETTINGS["project"]["problem_type"],
         train_config=SETTINGS.get("train", {}),
     )
-    save_model(model_pipeline, Path(SETTINGS["paths"]["model_path"]))
 
-    # 8. Evaluate
-    metrics = evaluate.evaluate_model(
-        model_pipeline, X_test, y_test, SETTINGS["project"]["problem_type"]
+    # 8. Evaluate (Val and Test)
+    val_metrics = evaluate.evaluate_model(
+        model_pipeline,
+        X_val,
+        y_val,
+        SETTINGS["project"]["problem_type"],
     )
+    final_preprocessor = features.get_feature_preprocessor(
+        quantile_bin_cols=SETTINGS["features"]["quantile_bin"],
+        categorical_onehot_cols=SETTINGS["features"]["categorical_onehot"],
+        numeric_passthrough_cols=SETTINGS["features"]["numeric_passthrough"],
+        n_bins=SETTINGS["features"]["n_bins"],
+    )
+    final_model_pipeline = train.train_model(
+        X_trainval,
+        y_trainval,
+        final_preprocessor,
+        SETTINGS["project"]["problem_type"],
+        train_config=SETTINGS.get("train", {}),
+    )
+    save_model(final_model_pipeline, Path(SETTINGS["paths"]["model_path"]))
+
+    test_metrics = evaluate.evaluate_model(
+        final_model_pipeline, X_test, y_test, SETTINGS["project"]["problem_type"]
+    )
+
+    metrics = {"val": val_metrics, "test": test_metrics}
     save_json(metrics, Path("reports/metrics.json"))
     save_json(SETTINGS, Path("reports/run_config.json"))
 
     # 9. Inference
-    df_preds = infer.run_inference(model_pipeline, X_test)
+    df_preds = infer.run_inference(final_model_pipeline, X_test)
     save_csv(df_preds, Path(SETTINGS["paths"]["report_path"]))
 
     logger.info("--- Pipeline Completed Successfully ---")

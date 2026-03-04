@@ -95,29 +95,16 @@ def save_model(model, filepath: Path) -> None:
     # END STUDENT CODE
     # --------------------------------------------------------
 
-
-def load_model(filepath: Path):
-    """
-    Inputs:
-    - filepath: Path object to a serialized model.
-    Outputs:
-    - model: Loaded Python object.
-    Why this contract matters for reliable ML delivery:
-    - Simplifies loading for inference without repeating code.
-    """
-    logger.info("Loading model from %s", filepath)
-    # --------------------------------------------------------
-    # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT: Add error handling for missing files
-    return joblib.load(filepath)
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
-
-
 def save_json(obj: dict, filepath: Path) -> None:
     logger.info("Saving JSON to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
+
+def load_model(filepath: Path):
+    logger.info("Loading model from %s", filepath)
+
+    if not filepath.exists():
+        raise FileNotFoundError(f"Model file not found: {filepath}")
+
+    return joblib.load(filepath)

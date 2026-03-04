@@ -1,13 +1,12 @@
 name: spotify-archetypes-env
 channels:
   - conda-forge
-  - defaults
 dependencies:
-  - python>=3.9
-  - pandas
-  - numpy
-  - scikit-learn
-  - joblib
+  - python=3.14
+  - pandas=2.2.*
+  - numpy=2.1.*
+  - scikit-learn=1.7.*
+  - joblib=1.4.*
   - jupyter
   - ipykernel
   - pytest

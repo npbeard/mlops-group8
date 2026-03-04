@@ -25,41 +25,48 @@ from pathlib import Path
 
 import pandas as pd  # type: ignore
 
-from src.utils import load_csv, save_csv
-
-logging.basicConfig(
-    filename="mlops.log",
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
-)
+from src.utils import load_csv
 
 logger = logging.getLogger(__name__)
 
 
 def load_raw_data(raw_data_path: Path) -> pd.DataFrame:
-    logger.info(f"Attempting to load raw data from {raw_data_path}")
+    """
+    Load raw data from a CSV file path.
+
+    Contract:
+      - Input: raw_data_path (Path) must exist and be a readable CSV.
+      - Output: non-empty pandas.DataFrame with raw data.
+    """
+    logger.info("Attempting to load raw data from %s", raw_data_path)
+
+    if not isinstance(raw_data_path, Path):
+        raise TypeError(f"raw_data_path must be a Path, got {type(raw_data_path)}")
+
+    if not raw_data_path.exists():
+        msg = (
+            f"Raw data file not found at: {raw_data_path}\n"
+            "Expected a CSV at this location. "
+            "Place the raw dataset there or update config.yaml (paths.raw_data)."
+        )
+        logger.error(msg)
+        raise FileNotFoundError(msg)
+
+    if raw_data_path.suffix.lower() != ".csv":
+        msg = f"Raw data path must be a .csv file, got: {raw_data_path.name}"
+        logger.error(msg)
+        raise ValueError(msg)
 
     try:
-        if not raw_data_path.exists():
-            logger.warning("Raw data file not found. Creating dummy dataset.")
-
-            dummy_df = pd.DataFrame({
-                "num_feature":
-                    [1.0, 2.5, 3.2, 4.8, 5.1, 0.5, 1.2, 3.3, 4.1, 2.9],
-                "cat_feature":
-                    ["A", "B", "A", "C", "B", "A", "C", "B", "A", "C"],
-                "target":
-                    [10, 20, 15, 30, 25, 12, 28, 22, 14, 27]
-            })
-
-            save_csv(dummy_df, raw_data_path)
-            logger.info("Dummy dataset created and saved.")
-
-        data = load_csv(raw_data_path)
-        logger.info("Raw data loaded successfully.")
-
-        return data
-
-    except Exception as e:
-        logger.error(f"Error occurred while loading raw data: {e}")
+        df = load_csv(raw_data_path)
+    except Exception:
+        logger.exception("Failed to read raw data from %s", raw_data_path)
         raise
+
+    if df is None or df.empty:
+        msg = f"Loaded raw data is empty: {raw_data_path}"
+        logger.error(msg)
+        raise ValueError(msg)
+
+    logger.info("Raw data loaded successfully. shape=%s", df.shape)
+    return df
