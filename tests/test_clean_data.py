@@ -1,5 +1,5 @@
 import pandas as pd  # type: ignore
-
+import pytest
 from src.clean_data import clean_dataframe
 
 
@@ -20,3 +20,20 @@ def test_clean_dataframe_basic():
     assert "speechiness" in df_clean.columns
     assert "duration_ms" in df_clean.columns
     assert len(df_clean) <= len(df)
+
+def test_clean_dataframe_raises_if_speechiness_missing():
+    df = pd.DataFrame({
+        "duration_ms": [1000, 2000],
+        "popularity": [10, 20],
+    })
+    with pytest.raises(KeyError):
+        clean_dataframe(df, target_column="popularity")
+
+
+def test_clean_dataframe_raises_if_duration_missing():
+    df = pd.DataFrame({
+        "speechiness": [0.1, 0.2],
+        "popularity": [10, 20],
+    })
+    with pytest.raises(KeyError):
+        clean_dataframe(df, target_column="popularity")

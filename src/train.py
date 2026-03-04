@@ -47,6 +47,11 @@ def train_model(
     # Examples:
     # 1. estimator = RandomForestClassifier(n_estimators=100)
     # 2. Add hyperparameter tuning (GridSearchCV)
+    if problem_type not in {"regression", "classification"}:
+        raise ValueError(
+            f"problem_type must be 'regression' or 'classification', got: {problem_type}"
+        )
+
     train_config = train_config or {}
 
     seed = train_config.get("seed", 42)

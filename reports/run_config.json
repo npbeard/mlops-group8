@@ -4,7 +4,7 @@
       "key",
       "mode"
     ],
-    "n_bins": 5,
+    "n_bins": 3,
     "numeric_passthrough": [
       "acousticness",
       "danceability",
@@ -20,21 +20,26 @@
       "tempo"
     ]
   },
+  "logging": {
+    "file": null,
+    "level": "INFO"
+  },
   "paths": {
-    "clean_data": "data/processed/clean.csv",
-    "model_path": "models/model.joblib",
-    "raw_data": "data/raw/SpotifyAudioFeaturesApril2019.csv",
-    "report_path": "reports/predictions.csv"
+    "clean_data": "/private/var/folders/sd/2d4k328s77l4gfj8jz9z3n340000gn/T/pytest-of-nicopbeard/pytest-19/test_main_pipeline_smoke0/data/processed/clean.csv",
+    "model_path": "/private/var/folders/sd/2d4k328s77l4gfj8jz9z3n340000gn/T/pytest-of-nicopbeard/pytest-19/test_main_pipeline_smoke0/models/model.joblib",
+    "raw_data": "/private/var/folders/sd/2d4k328s77l4gfj8jz9z3n340000gn/T/pytest-of-nicopbeard/pytest-19/test_main_pipeline_smoke0/data/raw/SpotifyAudioFeaturesApril2019.csv",
+    "report_path": "/private/var/folders/sd/2d4k328s77l4gfj8jz9z3n340000gn/T/pytest-of-nicopbeard/pytest-19/test_main_pipeline_smoke0/reports/predictions.csv"
   },
   "project": {
-    "name": "Spotify Sound Archetypes",
+    "name": "Test Project",
     "problem_type": "regression",
     "target_column": "popularity"
   },
   "train": {
-    "rf_max_depth": 10,
-    "rf_n_estimators": 100,
+    "rf_max_depth": 3,
+    "rf_n_estimators": 10,
     "seed": 42,
-    "test_size": 0.2
+    "test_size": 0.25,
+    "val_size": 0.25
   }
 }
