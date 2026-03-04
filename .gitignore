@@ -48,5 +48,6 @@ reports/**
 !reports/.gitkeep
 
 # Python cache
-__pycache__/
 *.pyc
+*.log
+logs/
