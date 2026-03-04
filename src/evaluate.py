@@ -6,12 +6,21 @@ Input: Trained Model + Test Data.
 Output: Metrics dictionary and plots saved to `reports/`.
 """
 import logging
-logger = logging.getLogger(__name__)
-import pandas as pd
-import numpy as np
-from sklearn.metrics import mean_squared_error, f1_score, mean_absolute_error
 
-def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, problem_type: str) -> float:
+import numpy as np
+import pandas as pd  # type: ignore
+from sklearn.metrics import (  # pyright: ignore[reportMissingModuleSource]
+    f1_score, mean_absolute_error, mean_squared_error)
+
+logger = logging.getLogger(__name__)
+
+
+def evaluate_model(
+    model,
+    X_test: pd.DataFrame,
+    y_test: pd.Series,
+    problem_type: str
+) -> float:
     """
     Inputs:
     - model: Fitted Pipeline.
@@ -20,17 +29,20 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, problem_type:
     Outputs:
     - float: The calculated metric (RMSE or F1).
     Why this contract matters for reliable ML delivery:
-    - Consistent evaluation allows us to compare different model versions fairly.
+    - Consistent evaluation allows us to
+    compare different model versions fairly.
     """
     logger.info("Evaluating model performance...")
 
     preds = model.predict(X_test)
 
-    # --------------------------------------------------------
+    # ---------------------
     # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT: Paste your notebook logic here to replace or extend the baseline
-    # Why: Business needs vary (e.g., minimizing False Negatives in fraud detection).
+    # ---------------------
+    # TODO_STUDENT:
+    # Paste your notebook logic here to replace or extend the baseline
+    # Why: Business needs vary
+    # (e.g., minimizing False Negatives in fraud detection).
     # Examples:
     # 1. classification_report(y_test, preds)
     # 2. mean_absolute_percentage_error(y_test, preds)
@@ -49,4 +61,5 @@ def evaluate_model(model, X_test: pd.DataFrame, y_test: pd.Series, problem_type:
     # END STUDENT CODE
     # --------------------------------------------------------
 
-    return float(metric)
+    # no fallback metric; the appropriate value is returned above
+    # for regression or classification, so this return is unnecessary.

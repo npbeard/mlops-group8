@@ -1,13 +1,13 @@
+import json
 import logging
 from pathlib import Path
 from typing import Optional
-import pandas as pd
-import joblib
-from pathlib import Path
-import json
-from pathlib import Path
+
+import joblib  # type: ignore
+import pandas as pd  # type: ignore
 
 logger = logging.getLogger(__name__)
+
 
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
     root = logging.getLogger()
@@ -31,6 +31,7 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
         fh.setFormatter(formatter)
         root.addHandler(fh)
 
+
 def load_csv(filepath: Path) -> pd.DataFrame:
     """
     Inputs:
@@ -49,6 +50,7 @@ def load_csv(filepath: Path) -> pd.DataFrame:
     # --------------------------------------------------------
     # END STUDENT CODE
     # --------------------------------------------------------
+
 
 def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
@@ -71,6 +73,7 @@ def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     # END STUDENT CODE
     # --------------------------------------------------------
 
+
 def save_model(model, filepath: Path) -> None:
     """
     Inputs:
@@ -92,6 +95,7 @@ def save_model(model, filepath: Path) -> None:
     # END STUDENT CODE
     # --------------------------------------------------------
 
+
 def load_model(filepath: Path):
     """
     Inputs:
@@ -110,6 +114,7 @@ def load_model(filepath: Path):
     # --------------------------------------------------------
     # END STUDENT CODE
     # --------------------------------------------------------
+
 
 def save_json(obj: dict, filepath: Path) -> None:
     logger.info("Saving JSON to %s", filepath)

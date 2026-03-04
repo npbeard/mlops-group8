@@ -1,6 +1,5 @@
-import pytest
-from pathlib import Path
 from src.load_data import load_raw_data
+
 
 def test_load_raw_data_creates_dummy(tmp_path):
     test_file = tmp_path / "test.csv"
