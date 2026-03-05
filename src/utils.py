@@ -33,15 +33,21 @@ def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
 
 
 def load_csv(filepath: Path) -> pd.DataFrame:
-    """
-    Inputs:
-    - filepath: Path object pointing to a CSV file.
-    Outputs:
-    - pd.DataFrame: Loaded data.
-    Why this contract matters for reliable ML delivery:
-    - Provides a single point of failure and fix for data ingestion issues.
-    """
     logger.info("Reading CSV from %s", filepath)
+
+    if not isinstance(filepath, Path):
+        raise TypeError(f"filepath must be a Path, got {type(filepath)}")
+
+    if not filepath.exists():
+        raise FileNotFoundError(f"CSV not found: {filepath}")
+
+    try:
+        df = pd.read_csv(filepath)
+    except Exception:
+        logger.exception("Failed to read CSV from %s", filepath)
+        raise
+
+    return df
 
 def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
@@ -55,7 +61,7 @@ def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
     logger.info("Saving CSV to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    
+
     df.to_csv(filepath, index=False)
 
 
