@@ -98,3 +98,12 @@ def test_load_model_loads_roundtrip(tmp_path):
 def test_load_model_raises_when_missing(tmp_path):
     with pytest.raises(FileNotFoundError):
         load_model(tmp_path / "missing_model.joblib")
+
+def test_load_csv_raises_if_not_path():
+    with pytest.raises(TypeError):
+        load_csv("not_a_path")  # type: ignore
+
+def test_load_csv_raises_if_missing(tmp_path):
+    missing = tmp_path / "missing.csv"
+    with pytest.raises(FileNotFoundError):
+        load_csv(missing)

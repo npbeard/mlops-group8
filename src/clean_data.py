@@ -26,10 +26,7 @@ def clean_dataframe(df_raw: pd.DataFrame, target_column: str) -> pd.DataFrame:
     """
     logger.info("Cleaning dataframe...")
     df_clean = df_raw.copy()
-
-    # ------------------------------------------
-    # START STUDENT CODE
-    # ------------------------------------------
+    
     # 1. Remove duplicate tracks to prevent leakage
     # (tracks appearing in both train/test)
     df_clean = df_clean.drop_duplicates(
@@ -52,6 +49,3 @@ def clean_dataframe(df_raw: pd.DataFrame, target_column: str) -> pd.DataFrame:
     df_clean = df_clean[df_clean["duration_ms"] > 0]
 
     return df_clean
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------

@@ -91,3 +91,16 @@ def test_main_pipeline_smoke(tmp_path, monkeypatch):
 
     assert (reports_dir / "metrics.json").exists()
     assert (reports_dir / "run_config.json").exists()
+
+def test_main_logs_and_raises_on_failure(monkeypatch):
+    # Make pipeline fail early
+    def boom(*args, **kwargs):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(main_mod.load_data, "load_raw_data", boom)
+
+    try:
+        main_mod.main()
+        assert False, "Expected RuntimeError"
+    except RuntimeError as e:
+        assert "boom" in str(e)

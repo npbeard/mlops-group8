@@ -33,17 +33,6 @@ def validate_dataframe(
     if df.empty:
         raise ValueError("Validation Failed: The provided DataFrame is empty.")
 
-    # --------------------------
-    # START STUDENT CODE
-    # --------------------------
-    # TODO_STUDENT:
-    # Paste your notebook logic here to replace or extend the baseline
-    # Why: Different models have different requirements
-    # (e.g., non-negative values for certain features).
-    # Examples:
-    # 1. check if columns in required_columns exist in df.columns
-    # 2. assert df[target].isnull().sum() == 0
-    # Verify all expected audio features and target are present
     if (missing_cols := [c for c in required_columns if c not in df.columns]):
         raise ValueError(f"Validation Failed: Missing columns {missing_cols}")
 
@@ -100,6 +89,3 @@ def validate_dataframe(
 
     logger.info("Schema and null-check validation passed.")
     return True
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
