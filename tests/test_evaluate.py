@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd  # type: ignore
-import pytest
-from sklearn.linear_model import LinearRegression, LogisticRegression  # type: ignore
+import pytest  # type: ignore
+from sklearn.linear_model import LinearRegression  # type: ignore
+from sklearn.linear_model import LogisticRegression  # type: ignore
 
 from src.evaluate import evaluate_model
 
@@ -58,7 +59,8 @@ def test_evaluate_requires_predict():
 def test_evaluate_raises_when_X_not_dataframe():
     y = pd.Series([1.0, 2.0, 3.0])
     with pytest.raises(TypeError):
-        evaluate_model(DummyModel(), [1, 2, 3], y, "regression")  # type: ignore
+        evaluate_model(DummyModel(), [1, 2, 3], y,
+                       "regression")  # type: ignore
 
 
 def test_evaluate_raises_when_X_empty():
@@ -78,7 +80,8 @@ def test_evaluate_raises_when_length_mismatch():
 def test_evaluate_raises_when_y_not_array_like():
     X = pd.DataFrame({"x": [1, 2, 3]})
     with pytest.raises(TypeError):
-        evaluate_model(DummyModel(), X, y_eval=123, problem_type="regression")  # not array-like
+        evaluate_model(DummyModel(), X, y_eval=123,
+                       problem_type="regression")  # not array-like
 
 
 def test_evaluate_raises_on_nan_predictions():

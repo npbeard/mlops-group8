@@ -1,4 +1,13 @@
-import pandas as pd
+# import  `pandas` is a popular Python library used for
+# data manipulation and analysis. In the provided
+# code snippet, `pandas` is being used to create
+# a DataFrame from a dictionary and to save that
+# DataFrame to a CSV file. Additionally, `pandas`
+# is commonly used for tasks such as data
+# cleaning, transformation, and exploration in
+# data science and machine learning projects.
+
+import pandas as pd  # type: ignore
 from pathlib import Path
 import src.utils as utils_mod
 import src.main as main_mod
@@ -91,6 +100,7 @@ def test_main_pipeline_smoke(tmp_path, monkeypatch):
 
     assert (reports_dir / "metrics.json").exists()
     assert (reports_dir / "run_config.json").exists()
+
 
 def test_main_logs_and_raises_on_failure(monkeypatch):
     # Make pipeline fail early

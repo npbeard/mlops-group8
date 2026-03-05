@@ -26,7 +26,7 @@ def clean_dataframe(df_raw: pd.DataFrame, target_column: str) -> pd.DataFrame:
     """
     logger.info("Cleaning dataframe...")
     df_clean = df_raw.copy()
-    
+
     # 1. Remove duplicate tracks to prevent leakage
     # (tracks appearing in both train/test)
     df_clean = df_clean.drop_duplicates(

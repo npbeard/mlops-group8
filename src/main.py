@@ -80,7 +80,8 @@ def main():
         val_size = SETTINGS["train"].get("val_size", 0.2)
         seed = SETTINGS["train"]["seed"]
 
-        strat = y if SETTINGS["project"]["problem_type"] == "classification" else None
+        strat = y if SETTINGS["project"][
+            "problem_type"] == "classification" else None
 
         X_trainval, X_test, y_trainval, y_test = train_test_split(
             X,
@@ -104,7 +105,8 @@ def main():
         )
 
         logger.info(
-            "Split sizes: train=%d (%.1f%%), val=%d (%.1f%%), test=%d (%.1f%%)",
+            "Split sizes:"
+            "train=%d (%.1f%%), val=%d (%.1f%%), test=%d (%.1f%%)",
             len(X_train), 100 * len(X_train) / len(X),
             len(X_val), 100 * len(X_val) / len(X),
             len(X_test), 100 * len(X_test) / len(X),
@@ -114,7 +116,8 @@ def main():
         preprocessor = features.get_feature_preprocessor(
             quantile_bin_cols=SETTINGS["features"]["quantile_bin"],
             categorical_onehot_cols=SETTINGS["features"]["categorical_onehot"],
-            numeric_passthrough_cols=SETTINGS["features"]["numeric_passthrough"],
+            numeric_passthrough_cols=SETTINGS["features"][
+                "numeric_passthrough"],
             n_bins=SETTINGS["features"]["n_bins"],
         )
 
@@ -138,7 +141,9 @@ def main():
         final_preprocessor = features.get_feature_preprocessor(
             quantile_bin_cols=SETTINGS["features"]["quantile_bin"],
             categorical_onehot_cols=SETTINGS["features"]["categorical_onehot"],
-            numeric_passthrough_cols=SETTINGS["features"]["numeric_passthrough"],
+            numeric_passthrough_cols=SETTINGS[
+                "features"][
+                "numeric_passthrough"],
             n_bins=SETTINGS["features"]["n_bins"],
         )
 
@@ -175,6 +180,7 @@ def main():
             "Pipeline failed due to an unhandled exception."
         )
         raise
+
 
 if __name__ == "__main__":
     main()

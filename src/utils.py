@@ -49,6 +49,7 @@ def load_csv(filepath: Path) -> pd.DataFrame:
 
     return df
 
+
 def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
     Inputs:
@@ -80,11 +81,13 @@ def save_model(model, filepath: Path) -> None:
 
     joblib.dump(model, filepath)
 
+
 def save_json(obj: dict, filepath: Path) -> None:
     logger.info("Saving JSON to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
+
 
 def load_model(filepath: Path):
     logger.info("Loading model from %s", filepath)

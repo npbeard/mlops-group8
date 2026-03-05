@@ -41,13 +41,16 @@ def load_raw_data(raw_data_path: Path) -> pd.DataFrame:
     logger.info("Attempting to load raw data from %s", raw_data_path)
 
     if not isinstance(raw_data_path, Path):
-        raise TypeError(f"raw_data_path must be a Path, got {type(raw_data_path)}")
+        raise TypeError(
+                        f"raw_data_path must be a Path, got"
+                        f" {type(raw_data_path)}")
 
     if not raw_data_path.exists():
         msg = (
             f"Raw data file not found at: {raw_data_path}\n"
             "Expected a CSV at this location. "
-            "Place the raw dataset there or update config.yaml (paths.raw_data)."
+            "Place the raw dataset there or "
+            "update config.yaml (paths.raw_data)."
         )
         logger.error(msg)
         raise FileNotFoundError(msg)

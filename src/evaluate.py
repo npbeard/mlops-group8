@@ -10,7 +10,9 @@ from typing import Any, Dict
 
 import numpy as np
 import pandas as pd  # type: ignore
-from sklearn.metrics import f1_score, mean_absolute_error, mean_squared_error  # type: ignore
+from sklearn.metrics import f1_score  # type: ignore
+from sklearn.metrics import mean_absolute_error  # type: ignore
+from sklearn.metrics import mean_squared_error  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,8 @@ def evaluate_model(
         raise TypeError("Model artifact must implement a .predict() method")
 
     if not isinstance(X_eval, pd.DataFrame):
-        raise TypeError(f"X_eval must be a pandas.DataFrame, got {type(X_eval)}")
+        raise TypeError(
+            f"X_eval must be a pandas.DataFrame, got {type(X_eval)}")
 
     if not isinstance(y_eval, (pd.Series, pd.DataFrame, np.ndarray, list)):
         raise TypeError(f"y_eval must be array-like, got {type(y_eval)}")
@@ -38,12 +41,14 @@ def evaluate_model(
 
     if len(X_eval) != len(y_eval):
         raise ValueError(
-            f"X_eval and y_eval length mismatch: {len(X_eval)} vs {len(y_eval)}"
+            f"X_eval and y_eval length mismatch:"
+            f"{len(X_eval)} vs {len(y_eval)}"
         )
 
     if problem_type not in {"regression", "classification"}:
         raise ValueError(
-            f"problem_type must be 'regression' or 'classification', got: {problem_type}"
+            f"problem_type must be 'regression' or 'classification',"
+            f"got: {problem_type}"
         )
 
     preds = model.predict(X_eval)
