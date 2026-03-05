@@ -37,16 +37,6 @@ def train_model(
     """
     logger.info("Training %s model...", problem_type)
 
-    # --------------------------------------------------------
-    # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT:
-    # Paste your notebook logic here to replace or extend the baseline
-    # Why: Choosing the right algorithm
-    # (XGBoost, RandomForest) depends on data size and complexity.
-    # Examples:
-    # 1. estimator = RandomForestClassifier(n_estimators=100)
-    # 2. Add hyperparameter tuning (GridSearchCV)
     if problem_type not in {"regression", "classification"}:
         raise ValueError(
             f"problem_type must be 'regression' or 'classification', got: {problem_type}"
@@ -79,9 +69,6 @@ def train_model(
             random_state=int(seed),
             n_jobs=-1,
         )
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
 
     model_pipeline = Pipeline([
         ("preprocess", preprocessor),

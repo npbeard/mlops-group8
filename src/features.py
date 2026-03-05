@@ -27,16 +27,6 @@ def get_feature_preprocessor(
     """
     logger.info("Building feature preprocessor recipe...")
 
-    # ---------------
-    # START STUDENT CODE
-    # ---------------
-    # TODO_STUDENT: Paste your notebook logic here
-    # to replace or extend the baseline
-    # Why: Different datasets need different encoding
-    # (e.g., Target Encoding for high-cardinality features).
-    # Examples:
-    # 1. SimpleImputer() for missing values
-    # 2. FunctionTransformer() for custom log transforms
     transformers = []
 
     if quantile_bin_cols:
