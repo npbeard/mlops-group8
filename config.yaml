@@ -39,3 +39,6 @@ features:
     - "speechiness"
     - "valence"
   n_bins: 5
+  logging:
+    level: "INFO"
+    file: "logs/mlops.log"
