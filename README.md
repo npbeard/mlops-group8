@@ -1,90 +1,60 @@
-# Spotify Popularity Prediction Pipeline
+# Spotify Popularity Prediction Pipeline #
 
 **Author:** Group 8  
 **Course:** MLOps: Master in Business Analytics and Data Science  
-**Status:** Session 1 (Initialization)
+**Status:** On Development
 
----
+-----
 
 ## Business Case
 
-### Client & Industry
-The hypothetical client is a **music streaming platform (e.g., Spotify) within the digital music streaming industry**. The platform manages millions of tracks and must prioritize which songs appear in playlists, recommendations, and discovery feeds.
+# 1. Client & Industry
+The hypothetical client is a music streaming platform (e.g., Spotify) operating in the digital music streaming industry. The platform manages millions of tracks and must prioritize which songs appear in playlists, recommendations, and discovery feeds.
 
-### Problem Statement & KPI
-Music platforms must continuously decide **which tracks to promote or prioritize** in recommendations and playlists. Currently, ranking may rely heavily on historical engagement metrics or manual curation.
+# 2. Problem Statement
+Music platforms must continuously decide which tracks to promote or prioritize. Current ranking often relies heavily on historical engagement metrics or manual curation, which can delay discovery of emerging hits.
 
-The objective of this project is to **predict track popularity using measurable audio features**, enabling earlier identification of high-potential tracks. The success KPI is a **3–5% improvement in average listening time or track completion rate** through better ranking and promotion decisions.
+# 3. Objective
+Develop a supervised machine learning model to predict Spotify track popularity (0–100) using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness. The objective is to identify which audio characteristics are most strongly associated with higher popularity and to build a predictive system that supports data-driven ranking and promotion decisions.
 
-### Solution & Scalability
-The proposed solution is a **machine learning pipeline that predicts popularity scores from audio characteristics** such as danceability, energy, loudness, tempo, and valence.
+# 4. Users
+Primary users:
+- Product teams
+- Recommendation system engineers
+- Music analytics teams
+They use predicted popularity scores to improve playlist ordering and recommendation quality.
 
-The pipeline is designed to scale by:
-- processing large music catalogs automatically,
-- retraining periodically as new data becomes available,
-- integrating predictions into recommendation systems or playlist ranking pipelines.
+# 5. Success KPI
+**Business KPI (The "Why"):**  
+  Improve recommendation and playlist engagement metrics by enabling more accurate ranking of tracks, with a target uplift of 3–5% in average listening time or track completion rate.
 
-### Benefit vs Non-AI Approach
-Traditional approaches rely on **historical engagement metrics or manual curation**, which can delay the discovery of emerging hits.
+**Technical Metric (The "How"):**  
+  Achieve an RMSE that outperforms a baseline model (e.g., mean predictor or simple linear regression) and maintain stable MAE performance across validation splits.
 
-A machine learning model can **identify promising tracks earlier using intrinsic audio properties**, enabling faster and more data-driven promotion decisions.
+**Acceptance Criteria:**  
+  The model must outperform a defined baseline on RMSE and MAE, demonstrate stable performance across validation data, and produce reproducible predictions through the end-to-end pipeline executed via `src.main`.
 
-### Estimated Costs
+# 6. AI vs Non-AI Approach
+Traditional approaches rely on historical engagement or manual curation. A machine learning model can identify promising tracks earlier using intrinsic audio properties.
+
+# 7. Estimated Costs
 A typical implementation could involve:
 - **Team:** 1 Data Scientist and 1 ML Engineer
 - **Timeline:** Approximately 4–6 weeks for initial development and deployment
 - **Infrastructure:** Cloud compute for training and batch inference, with costs depending on catalog size and retraining frequency.
 
-### Risks & Mitigations
+# 8. Risks & Mitigations
+- Popularity bias toward already well-known tracks | Use diverse training data and monitor prediction distributions |
+- Data drift as music trends evolve | Implement periodic retraining and performance monitoring |
+- Overfitting to historical patterns | Apply validation splits, baselines, and regularization |
+- Misuse in recommendation ranking | Combine predictions with other engagement signals rather than relying solely on model output |
 
-| Risk | Mitigation |
-|-----|-----|
-| Popularity bias toward already well-known tracks | Use diverse training data and monitor prediction distributions |
-| Data drift as music trends evolve | Implement periodic retraining and performance monitoring |
-| Overfitting to historical patterns | Apply validation splits, baselines, and regularization |
-| Misuse in recommendation ranking | Combine predictions with other engagement signals rather than relying solely on model output |
+# 9. The Data
+- Source: SpotifyAudioFeaturesApril2019 (Kaggle)
+- Target Variable:  `popularity` (numeric score from 0 to 100), representing the relative popularity of a track on Spotify.
+- Sensitive Info: The dataset does not contain personally identifiable information (PII). It consists solely of track-level audio features and metadata.
 
-## 1. Business Objective
-
-* **The Goal:**  
-  Develop a supervised machine learning model to predict Spotify track popularity (0–100) using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness.
-
-  The objective is to identify which audio characteristics are most strongly associated with higher popularity and to build a predictive system that supports data-driven ranking and promotion decisions.
-
-* **The User:**  
-  The primary users of this model are music streaming product teams, recommendation system engineers, and music analytics teams.
-
-  They would use predicted popularity scores to prioritize tracks within recommendation systems, optimize playlist ordering, and better understand the relationship between audio features and user engagement.
-
----
-
-## 2. Success Metrics
-
-* **Business KPI (The "Why"):**  
-  Improve recommendation and playlist engagement metrics by enabling more accurate ranking of tracks, with a target uplift of 3–5% in average listening time or track completion rate.
-
-* **Technical Metric (The "How"):**  
-  Achieve an RMSE that outperforms a baseline model (e.g., mean predictor or simple linear regression) and maintain stable MAE performance across validation splits.
-
-* **Acceptance Criteria:**  
-  The model must outperform a defined baseline on RMSE and MAE, demonstrate stable performance across validation data, and produce reproducible predictions through the end-to-end pipeline executed via `src.main`.
-
----
-
-## 3. The Data
-
-* **Source:** SpotifyAudioFeaturesApril2019 (Kaggle)
-
-* **Target Variable:**  
-  `popularity` (numeric score from 0 to 100), representing the relative popularity of a track on Spotify.
-
-* **Sensitive Info:**  
-  The dataset does not contain personally identifiable information (PII). It consists solely of track-level audio features and metadata.
-
----
-
-## 4. Repository Structure
-
+# 10. Repository Structure
 This project follows a strict separation between "Sandbox" (Notebooks) and "Production" (Src).
 
 ```text
@@ -139,7 +109,7 @@ This project follows a strict separation between "Sandbox" (Notebooks) and "Prod
     └── test_validate.py
 ```
 
-## 5. Execution Model
+## 11. Execution Model
 
 The full machine learning pipeline will eventually be executable through:
 
