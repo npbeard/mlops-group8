@@ -44,7 +44,12 @@ def get_feature_preprocessor(
         transformers.append(
             (
                 "quantile_bins",
-                KBinsDiscretizer(n_bins=n_bins, encode="onehot-dense", strategy="quantile", quantile_method="linear"),
+                KBinsDiscretizer(
+                    n_bins=n_bins,
+                    encode="onehot-dense",
+                    strategy="quantile",
+                    quantile_method="linear"
+                ),
                 quantile_bin_cols
             )
         )
@@ -66,8 +71,3 @@ def get_feature_preprocessor(
             ("num_pass", StandardScaler(), numeric_passthrough_cols))
 
     return ColumnTransformer(transformers=transformers, remainder="drop")
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
-
-    # return ColumnTransformer(transformers=transformers, remainder="drop")
