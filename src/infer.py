@@ -26,7 +26,8 @@ def run_inference(model: Any, X_infer: pd.DataFrame) -> pd.DataFrame:
         raise TypeError("Model artifact must implement a .predict() method")
 
     if not isinstance(X_infer, pd.DataFrame):
-        raise TypeError(f"X_infer must be a pandas.DataFrame, got {type(X_infer)}")
+        raise TypeError(f"X_infer must be a pandas.DataFrame,"
+                        f"got {type(X_infer)}")
 
     if X_infer.empty:
         raise ValueError("X_infer is empty; cannot run inference")

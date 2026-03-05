@@ -1,6 +1,6 @@
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-import pytest
+import pandas as pd  # type: ignore
+from sklearn.linear_model import LinearRegression  # type: ignore
+import pytest  # type: ignore
 
 from src.infer import run_inference
 
@@ -26,6 +26,7 @@ def test_run_inference_requires_predict():
 
     with pytest.raises(TypeError):
         run_inference(NoPredict(), X_infer)
+
 
 def test_run_inference_raises_on_empty_df():
     X = pd.DataFrame({"x": []})

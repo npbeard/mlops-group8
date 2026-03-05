@@ -34,7 +34,11 @@ def get_feature_preprocessor(
         transformers.append(
             (
                 "quantile_bins",
-                KBinsDiscretizer(n_bins=n_bins, encode="onehot-dense", strategy="quantile", quantile_method="linear"),
+                KBinsDiscretizer(
+                    n_bins=n_bins,
+                    encode="onehot-dense",
+                    strategy="quantile",
+                    quantile_method="linear"),
                 quantile_bin_cols
             )
         )

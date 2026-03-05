@@ -39,7 +39,8 @@ def train_model(
 
     if problem_type not in {"regression", "classification"}:
         raise ValueError(
-            f"problem_type must be 'regression' or 'classification', got: {problem_type}"
+            f"problem_type must be 'regression' or 'classification',"
+            f" got: {problem_type}"
         )
 
     train_config = train_config or {}

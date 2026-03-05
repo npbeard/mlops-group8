@@ -1,5 +1,5 @@
 import pandas as pd  # type: ignore
-import pytest
+import pytest   # type: ignore
 from src.clean_data import clean_dataframe
 
 
@@ -20,6 +20,7 @@ def test_clean_dataframe_basic():
     assert "speechiness" in df_clean.columns
     assert "duration_ms" in df_clean.columns
     assert len(df_clean) <= len(df)
+
 
 def test_clean_dataframe_raises_if_speechiness_missing():
     df = pd.DataFrame({
