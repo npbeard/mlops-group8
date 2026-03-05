@@ -42,15 +42,6 @@ def load_csv(filepath: Path) -> pd.DataFrame:
     - Provides a single point of failure and fix for data ingestion issues.
     """
     logger.info("Reading CSV from %s", filepath)
-    # --------------------------------------------------------
-    # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT: Adjust read parameters (sep, encoding, index_col)
-    return pd.read_csv(filepath)
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
-
 
 def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
@@ -64,14 +55,8 @@ def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
     logger.info("Saving CSV to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    # --------------------------------------------------------
-    # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT: Adjust save parameters (compression, index)
+    
     df.to_csv(filepath, index=False)
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
 
 
 def save_model(model, filepath: Path) -> None:
@@ -86,14 +71,8 @@ def save_model(model, filepath: Path) -> None:
     """
     logger.info("Saving model to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    # --------------------------------------------------------
-    # START STUDENT CODE
-    # --------------------------------------------------------
-    # TODO_STUDENT: Adjust compression or serialization library
+
     joblib.dump(model, filepath)
-    # --------------------------------------------------------
-    # END STUDENT CODE
-    # --------------------------------------------------------
 
 def save_json(obj: dict, filepath: Path) -> None:
     logger.info("Saving JSON to %s", filepath)

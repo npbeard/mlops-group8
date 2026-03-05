@@ -47,30 +47,6 @@ def test_load_raw_data_logs_and_raises_on_read_error(tmp_path, monkeypatch):
 
 def test_load_raw_data_raises_on_load_csv_error(tmp_path, monkeypatch):
     p = tmp_path / "data.csv"
-    p.write_text("a,b\n1,2\n")  # file exists
-
-    def boom(_):
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(load_data_mod, "load_csv", boom)
-
-    with pytest.raises(RuntimeError):
-        load_data_mod.load_raw_data(p)
-
-def test_load_raw_data_raises_on_load_csv_error(tmp_path, monkeypatch):
-    p = tmp_path / "data.csv"
-    p.write_text("a,b\n1,2\n")
-
-    def boom(_):
-        raise RuntimeError("boom")
-
-    monkeypatch.setattr(load_data_mod, "load_csv", boom)
-
-    with pytest.raises(RuntimeError):
-        load_data_mod.load_raw_data(p)
-
-def test_load_raw_data_raises_on_load_csv_error(tmp_path, monkeypatch):
-    p = tmp_path / "data.csv"
     p.write_text("a,b\n1,2\n")
 
     def boom(_):
