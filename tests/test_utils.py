@@ -4,6 +4,7 @@ import pytest  # type: ignore
 import logging
 import json
 import joblib  # type: ignore
+from pathlib import Path
 from src.utils import load_csv, load_model, save_csv
 from src.utils import save_json, save_model, setup_logging
 
@@ -48,32 +49,15 @@ def test_save_json_writes_file(tmp_path):
 
 
 def test_setup_logging_creates_file_handler(tmp_path, monkeypatch):
-    # Reset root logger handlers so we can test the handler creation branch
-    root = logging.getLogger()
-    old_handlers = root.handlers[:]
-    root.handlers.clear()
-
     log_path = tmp_path / "logs" / "test.log"
     setup_logging(level="INFO", log_file=str(log_path))
 
     assert log_path.exists()
-    # file handler should have created the file's parent dir
-
-    # Restore handlers so we don't affect other tests
-    root.handlers = old_handlers
-
-
-def test_setup_logging_returns_if_handlers_exist(monkeypatch):
-    root = logging.getLogger()
-# sourcery skip: no-conditionals-in-tests
-    if not root.handlers:
-        root.addHandler(logging.StreamHandler())
-
-    n_before = len(root.handlers)
-    setup_logging(level="INFO", log_file=None)
-    n_after = len(root.handlers)
-
-    assert n_after == n_before
+    assert any(
+        isinstance(handler, logging.FileHandler)
+        and Path(handler.baseFilename) == log_path
+        for handler in logging.getLogger().handlers
+    )
 
 
 def test_save_json_writes_content(tmp_path):

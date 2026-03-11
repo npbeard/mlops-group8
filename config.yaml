@@ -10,6 +10,7 @@ paths:
   clean_data: "data/processed/clean.csv"
   model_path: "models/model.joblib"
   report_path: "reports/predictions.csv"
+  log_file: "logs/pipeline.log"
 
 train:
   test_size: 0.2
@@ -39,3 +40,14 @@ features:
     - "speechiness"
     - "valence"
   n_bins: 5
+
+logging:
+  level: "INFO"
+  format: "text"
+
+wandb:
+  enabled: true
+  project: "spotify-sound-archetypes"
+  model_artifact_name: "spotify-popularity-pipeline"
+  log_processed_data: true
+  log_predictions: true

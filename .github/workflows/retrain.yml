@@ -1,0 +1,57 @@
+name: Retrain Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      wandb_mode:
+        description: "Weights & Biases mode"
+        required: false
+        default: "online"
+        type: choice
+        options:
+          - online
+          - offline
+          - disabled
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+
+    env:
+      WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+      WANDB_MODE: ${{ inputs.wandb_mode }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: spotify-archetypes-env
+          environment-file: environment.yml
+          auto-activate-base: false
+          python-version: "3.14"
+
+      - name: Run training pipeline
+        shell: bash -l {0}
+        run: |
+          python -m src.main
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: models/model.joblib
+          if-no-files-found: error
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-reports
+          path: |
+            reports/metrics.json
+            reports/predictions.csv
+            reports/run_config.json
+            logs/pipeline.log
+          if-no-files-found: error

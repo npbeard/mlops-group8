@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - "feature/**"
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Conda environment
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: spotify-archetypes-env
+          environment-file: environment.yml
+          auto-activate-base: false
+          python-version: "3.14"
+
+      - name: Run unit tests with coverage
+        shell: bash -l {0}
+        run: |
+          pytest --cov=src --cov-report=term-missing

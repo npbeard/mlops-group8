@@ -1,4 +1,5 @@
 import logging
+from inspect import signature
 from typing import List, Optional
 
 from sklearn.compose import ColumnTransformer  # type: ignore
@@ -6,6 +7,17 @@ from sklearn.preprocessing import (KBinsDiscretizer,  # type: ignore
                                    OneHotEncoder, StandardScaler)
 
 logger = logging.getLogger(__name__)
+
+
+def _build_kbins_discretizer(n_bins: int) -> KBinsDiscretizer:
+    kwargs = {
+        "n_bins": n_bins,
+        "encode": "onehot-dense",
+        "strategy": "quantile",
+    }
+    if "quantile_method" in signature(KBinsDiscretizer).parameters:
+        kwargs["quantile_method"] = "linear"
+    return KBinsDiscretizer(**kwargs)
 
 
 def get_feature_preprocessor(
@@ -34,11 +46,7 @@ def get_feature_preprocessor(
         transformers.append(
             (
                 "quantile_bins",
-                KBinsDiscretizer(
-                    n_bins=n_bins,
-                    encode="onehot-dense",
-                    strategy="quantile",
-                    quantile_method="linear"),
+                _build_kbins_discretizer(n_bins),
                 quantile_bin_cols
             )
         )
