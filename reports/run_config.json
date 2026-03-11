@@ -20,8 +20,13 @@
       "tempo"
     ]
   },
+  "logging": {
+    "format": "text",
+    "level": "INFO"
+  },
   "paths": {
     "clean_data": "data/processed/clean.csv",
+    "log_file": "logs/pipeline.log",
     "model_path": "models/model.joblib",
     "raw_data": "data/raw/SpotifyAudioFeaturesApril2019.csv",
     "report_path": "reports/predictions.csv"
@@ -37,5 +42,12 @@
     "seed": 42,
     "test_size": 0.2,
     "val_size": 0.2
+  },
+  "wandb": {
+    "enabled": true,
+    "log_predictions": true,
+    "log_processed_data": true,
+    "model_artifact_name": "spotify-popularity-pipeline",
+    "project": "spotify-sound-archetypes"
   }
 }

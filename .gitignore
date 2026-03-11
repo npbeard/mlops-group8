@@ -51,3 +51,5 @@ reports/**
 *.pyc
 *.log
 logs/
+wandb/
+.wandb/

@@ -112,3 +112,42 @@ The full machine learning pipeline will eventually be executable through:
 
 To run tests/coverage:
 `pytest --cov=src --cov-report=term-missing`
+
+### 12. Logging, Secrets, and W&B
+Weights & Biases support is controlled from [config.yaml]. When `wandb.enabled` is `true`, the pipeline will initialize online or offline tracking depending on your environment variables and available credentials.
+
+If you want experiment tracking:
+1. Install `wandb` in your environment.
+2. Add `WANDB_API_KEY` to `.env`.
+3. Set `wandb.enabled: true` in [config.yaml].
+
+### 13. MLOps Maturity: Level 1 to Level 2
+Based on the Session 9 framework, this repository now separates the two maturity levels like this:
+
+Level 1: ML pipeline automation
+- Modular production pipeline in `src/`
+- Centralized runtime configuration in [config.yaml]
+- Process-wide logging in [src/logger.py]
+- Secret management through `.env`
+- Automated tests covering the production modules
+- Single entrypoint for deterministic end-to-end runs: `python -m src.main`
+
+Level 2: CI/CD automation
+- CI workflow in [.github/workflows/ci.yml] runs tests and coverage on push and pull request
+- Retraining workflow in [.github/workflows/retrain.yml] runs the pipeline on demand and publishes model/report artifacts
+- W&B can be enabled in pipeline runs through repository secrets instead of local-only execution
+
+This is the architectural shift from Level 1 to Level 2:
+- Level 1 automates the ML factory.
+- Level 2 automates the governance around that factory: integration checks, retraining execution, and artifact publication.
+
+### 14. GitHub Actions Setup
+To use the new Level 2 workflows in GitHub:
+
+1. Add the repository secret `WANDB_API_KEY` if you want online W&B tracking in GitHub Actions.
+2. Push the branch so GitHub picks up:
+   - [ci.yml]
+   - [retrain.yml]
+3. Use the `Retrain Pipeline` workflow from the GitHub Actions tab when you want a controlled retraining run.
+
+If you do not add `WANDB_API_KEY`, set `wandb.enabled: false` in [config.yaml] or run the retraining workflow with `wandb_mode=disabled`.
