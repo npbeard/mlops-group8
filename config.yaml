@@ -10,7 +10,10 @@ paths:
   clean_data: "data/processed/clean.csv"
   model_path: "models/model.joblib"
   report_path: "reports/predictions.csv"
+  metrics_path: "reports/metrics.json"
+  run_config_path: "reports/run_config.json"
   log_file: "logs/pipeline.log"
+  artifact_cache_dir: ".artifacts"
 
 train:
   test_size: 0.2
@@ -47,7 +50,16 @@ logging:
 
 wandb:
   enabled: true
+  entity: ""
   project: "spotify-sound-archetypes"
   model_artifact_name: "spotify-popularity-pipeline"
+  production_alias: "prod"
   log_processed_data: true
   log_predictions: true
+
+inference:
+  source: "wandb"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
