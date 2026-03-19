@@ -38,7 +38,10 @@ def _base_settings(tmp_path, *, wandb_enabled=False):
             "clean_data": str(tmp_path / "data" / "processed" / "clean.csv"),
             "model_path": str(tmp_path / "models" / "model.joblib"),
             "report_path": str(tmp_path / "reports" / "predictions.csv"),
+            "metrics_path": str(tmp_path / "reports" / "metrics.json"),
+            "run_config_path": str(tmp_path / "reports" / "run_config.json"),
             "log_file": str(tmp_path / "logs" / "pipeline.log"),
+            "artifact_cache_dir": str(tmp_path / ".artifacts"),
         },
         "train": {
             "test_size": 0.25,
@@ -59,11 +62,15 @@ def _base_settings(tmp_path, *, wandb_enabled=False):
         "logging": {"level": "INFO"},
         "wandb": {
             "enabled": wandb_enabled,
+            "entity": "group8",
             "project": "spotify-tests",
             "model_artifact_name": "spotify-popularity-pipeline",
+            "production_alias": "prod",
             "log_processed_data": False,
             "log_predictions": False,
         },
+        "inference": {"source": "local"},
+        "api": {"host": "0.0.0.0", "port": 8000},
     }
 
 

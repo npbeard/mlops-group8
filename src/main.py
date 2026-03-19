@@ -178,8 +178,8 @@ def main(config: dict[str, Any] | None = None) -> int:
         predictions_artifact_path = resolve_repo_path(
             project_root, cfg["paths"]["report_path"]
         )
-        metrics_path = project_root / "reports" / "metrics.json"
-        run_config_path = project_root / "reports" / "run_config.json"
+        metrics_path = resolve_repo_path(project_root, cfg["paths"]["metrics_path"])
+        run_config_path = resolve_repo_path(project_root, cfg["paths"]["run_config_path"])
 
         df_raw = load_data.load_raw_data(raw_data_path)
         if wandb_run is not None:

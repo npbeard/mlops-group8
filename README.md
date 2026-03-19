@@ -1,153 +1,265 @@
-# Spotify Popularity Prediction Pipeline #
+# Spotify Popularity Prediction Pipeline
 
 **Author:** Group 8  
 **Course:** MLOps: Master in Business Analytics and Data Science  
-**Status:** On Development
+**Status:** Production-oriented final submission
 
 -----
 
 ## Business Case
 
-### 1. Client & Industry
-The hypothetical client is a music streaming platform (e.g., Spotify) operating in the digital music streaming industry. The platform manages millions of tracks and must prioritize which songs appear in playlists, recommendations, and discovery feeds.
+Music platforms need to decide which tracks deserve promotion in playlists, search surfaces, and recommendation modules. Relying only on historical engagement creates lag, reinforces incumbents, and slows down discovery. This project predicts track popularity from audio features so product, recommendation, and analytics teams can rank songs earlier and more consistently.
 
-### 2. Problem Statement
-Music platforms must continuously decide which tracks to promote or prioritize. Current ranking often relies heavily on historical engagement metrics or manual curation, which can delay discovery of emerging hits.
+The business value is operational as much as predictive:
+- Faster experimentation on ranking rules
+- More reproducible model retraining and evaluation
+- Safer deployment through CI, release discipline, and typed API contracts
+- Better traceability through logs, W&B artifacts, and versioned serving
 
-### 3. Objective
-Develop a supervised machine learning model to predict Spotify track popularity (0–100) using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness. The objective is to identify which audio characteristics are most strongly associated with higher popularity and to build a predictive system that supports data-driven ranking and promotion decisions.
+### Objective
 
-### 4. Users
-Primary users:
+Develop a supervised machine learning model to predict Spotify track popularity on a 0 to 100 scale using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness. The objective is to identify which audio characteristics are associated with higher popularity and to turn that analysis into a reproducible ML product.
+
+### Users
+
+Primary users of this solution are:
 - Product teams
 - Recommendation system engineers
 - Music analytics teams
-They use predicted popularity scores to improve playlist ordering and recommendation quality.
 
-### 5. Success KPI
-- Business KPI (The "Why"): Improve recommendation and playlist engagement metrics by enabling more accurate ranking of tracks, with a target uplift of 3–5% in average listening time or track completion rate.
+These stakeholders can use predicted popularity scores to support ranking, playlist ordering, and discovery experiments.
 
-- Technical Metric (The "How"): Achieve an RMSE that outperforms a baseline model (e.g., mean predictor or simple linear regression) and maintain stable MAE performance across validation splits.
+### What Success Means
 
-- Acceptance Criteria: The model must outperform a defined baseline on RMSE and MAE, demonstrate stable performance across validation data, and produce reproducible predictions through the end-to-end pipeline executed via `src.main`.
+- Business KPI: Improve recommendation or playlist engagement by supporting better track ranking decisions, with a target uplift in listening time or completion rate.
+- Technical KPI: Achieve RMSE and MAE that outperform a simple baseline and remain stable across validation and test splits.
+- Operational KPI: Ensure predictions can be reproduced through a single entrypoint, tracked in W&B, served through a validated API contract, and deployed through controlled CI/CD workflows.
+- Acceptance criteria: The pipeline must train, evaluate, register, and serve the model consistently with no manual notebook steps required in production.
 
-### 6. AI vs Non-AI Approach
-Traditional approaches rely on historical engagement or manual curation. A machine learning model can identify promising tracks earlier using intrinsic audio properties.
+### AI vs Non-AI Approach
 
-### 7. Estimated Costs
-A typical implementation could involve:
-- Team: 1 Data Scientist and 1 ML Engineer
-- Timeline: Approximately 4–6 weeks for initial development and deployment
-- Infrastructure: Cloud compute for training and batch inference, with costs depending on catalog size and retraining frequency.
+Traditional ranking approaches rely heavily on historical engagement signals or manual curation. A machine learning approach can surface promising tracks earlier by learning from intrinsic audio properties, while still allowing product teams to combine predictions with editorial or behavioral signals.
 
-### 8. Risks & Mitigations
-- Popularity bias toward already well-known tracks --> Use diverse training data and monitor prediction distributions
-- Data drift as music trends evolve --> Implement periodic retraining and performance monitoring
-- Overfitting to historical patterns --> Apply validation splits, baselines, and regularization
-- Misuse in recommendation ranking --> Combine predictions with other engagement signals rather than relying solely on model output
+### Risks and Mitigations
 
-### 9. The Data
-- Source: SpotifyAudioFeaturesApril2019 (Kaggle)
-- Target Variable:  `popularity` (numeric score from 0 to 100), representing the relative popularity of a track on Spotify.
-- Sensitive Info: The dataset does not contain personally identifiable information (PII). It consists solely of track-level audio features and metadata.
+- Popularity bias toward already well-known tracks. Mitigation: monitor prediction distributions and compare against baseline ranking logic.
+- Data drift as music trends evolve. Mitigation: retrain periodically and track performance over time in W&B.
+- Overfitting to historical patterns. Mitigation: use validation splits, held-out test evaluation, and reproducible retraining.
+- Misuse in ranking decisions. Mitigation: use predictions as one signal among several, not as the sole ranking mechanism.
 
-### 10. Repository Structure
-This project follows a strict separation between "Sandbox" (Notebooks) and "Production" (Src).
+## What This Repository Delivers
+
+- Modular end-to-end ML pipeline in `src/`
+- Single orchestration entrypoint via `python -m src.main`
+- Centralized non-secret runtime settings in `config.yaml`
+- Secret handling through `.env` and `.env.example`
+- Dual-destination logging to console and local file
+- W&B experiment tracking plus managed model-artifact inference
+- FastAPI service with `/health` and `/predict`
+- Dockerized serving setup with strict `.dockerignore`
+- PR CI workflow and release-gated deploy workflow
+- Tests for core modules and API contract behavior
+
+## Repository Structure
 
 ```text
 .
-├── LICENSE
-├── README.md                # Project definition
-├── config.yaml              # Global configuration (paths, params)
-├── environment.yml          # Dependencies (Conda/Pip)
-├── mlops.log                # Pipeline / run logs
-├── pytest.ini               # Pytest configuration
-│
-├── data/                    # Local data storage
-│   ├── inference/           # Inputs/outputs for inference runs
-│   ├── processed/           # Clean/processed datasets
-│   │   └── clean.csv
-│   └── raw/                 # Original source data
-│       └── SpotifyAudioFeaturesApril2019.csv
-│
-├── models/                  # Serialized model artifacts
-│   └── model.joblib
-│
-├── notebooks/               # Experimental sandbox
-│   ├── Final_Assignment.ipynb
-│   └── sandbox_pipeline_step_by_step.ipynb
-│
-├── reports/                 # Generated metrics, predictions, and configs
-│   ├── metrics.json
-│   ├── predictions.csv
-│   └── run_config.json
-│
-├── src/                     # Production code (The "Factory")
-│   ├── __init__.py
+├── .github/workflows/
+│   ├── ci.yml
+│   ├── deploy.yml
+│   └── retrain.yml
+├── config.yaml
+├── conda-lock.yml
+├── Dockerfile
+├── environment.yml
+├── README.md
+├── data/
+├── logs/
+├── models/
+├── notebooks/
+├── reports/
+├── scripts/
+│   └── call_api.py
+├── src/
+│   ├── api.py
 │   ├── clean_data.py
 │   ├── evaluate.py
 │   ├── features.py
 │   ├── infer.py
 │   ├── load_data.py
+│   ├── logger.py
 │   ├── main.py
 │   ├── train.py
 │   ├── utils.py
 │   └── validate.py
-│
-└── tests/                   # Automated test suite
-    ├── test_clean_data.py
-    ├── test_evaluate.py
-    ├── test_features.py
-    ├── test_infer.py
-    ├── test_load_data.py
-    ├── test_main.py
-    ├── test_train.py
-    ├── test_utils.py
-    └── test_validate.py
+└── tests/
 ```
 
-### 11. Execution Model
-The full machine learning pipeline will eventually be executable through:
-`python -m src.main`
+## Setup
 
-To run tests/coverage:
-`pytest --cov=src --cov-report=term-missing`
+### 1. Create the environment
 
-### 12. Logging, Secrets, and W&B
-Weights & Biases support is controlled from [config.yaml]. When `wandb.enabled` is `true`, the pipeline will initialize online or offline tracking depending on your environment variables and available credentials.
+```bash
+conda env create -f environment.yml
+conda activate spotify-archetypes-env
+```
 
-If you want experiment tracking:
-1. Install `wandb` in your environment.
-2. Add `WANDB_API_KEY` to `.env`.
-3. Set `wandb.enabled: true` in [config.yaml].
+For a reproducible lock-based environment:
 
-### 13. MLOps Maturity: Level 1 to Level 2
-Based on the Session 9 framework, this repository now separates the two maturity levels like this:
+```bash
+conda-lock install -n spotify-archetypes-env conda-lock.yml
+```
 
-Level 1: ML pipeline automation
-- Modular production pipeline in `src/`
-- Centralized runtime configuration in [config.yaml]
-- Process-wide logging in [src/logger.py]
-- Secret management through `.env`
-- Automated tests covering the production modules
-- Single entrypoint for deterministic end-to-end runs: `python -m src.main`
+### 2. Configure secrets
 
-Level 2: CI/CD automation
-- CI workflow in [.github/workflows/ci.yml] runs tests and coverage on push and pull request
-- Retraining workflow in [.github/workflows/retrain.yml] runs the pipeline on demand and publishes model/report artifacts
-- W&B can be enabled in pipeline runs through repository secrets instead of local-only execution
+Copy `.env.example` into `.env` and fill in your W&B API key:
 
-This is the architectural shift from Level 1 to Level 2:
-- Level 1 automates the ML factory.
-- Level 2 automates the governance around that factory: integration checks, retraining execution, and artifact publication.
+```dotenv
+WANDB_API_KEY=...
+```
 
-### 14. GitHub Actions Setup
-To use the new Level 2 workflows in GitHub:
+Secrets must never be committed. `.env` is ignored by git and excluded from Docker builds.
 
-1. Add the repository secret `WANDB_API_KEY` if you want online W&B tracking in GitHub Actions.
-2. Push the branch so GitHub picks up:
-   - [ci.yml]
-   - [retrain.yml]
-3. Use the `Retrain Pipeline` workflow from the GitHub Actions tab when you want a controlled retraining run.
+Keep non-secret W&B settings such as `entity`, `project`, artifact name, and production alias in `config.yaml`.
 
-If you do not add `WANDB_API_KEY`, set `wandb.enabled: false` in [config.yaml] or run the retraining workflow with `wandb_mode=disabled`.
+### 3. Place the raw dataset
+
+The default expected path is `data/raw/SpotifyAudioFeaturesApril2019.csv`.
+
+## Running the Training Pipeline
+
+```bash
+python -m src.main
+```
+
+Outputs:
+- Clean dataset in `data/processed/clean.csv`
+- Model artifact in `models/model.joblib`
+- Predictions in `reports/predictions.csv`
+- Metrics in `reports/metrics.json`
+- Run config snapshot in `reports/run_config.json`
+- Local logs in `logs/pipeline.log`
+
+When W&B is enabled, `src.main` also logs:
+- Run metadata
+- Validation and test metrics
+- Model artifact
+- Optional processed-data and prediction artifacts
+
+## Model Registry and Production Inference
+
+Training logs a managed W&B model artifact. Production inference is configured to load the artifact aliased `prod`, not an unmanaged local file. That behavior is controlled in `config.yaml`:
+
+```yaml
+wandb:
+  entity: "your-wandb-entity"
+  project: "spotify-sound-archetypes"
+  model_artifact_name: "spotify-popularity-pipeline"
+  production_alias: "prod"
+
+inference:
+  source: "wandb"
+```
+
+Recommended promotion flow:
+1. Train and inspect the candidate artifact in W&B.
+2. Promote the approved artifact to alias `prod`.
+3. Deploy only after publishing a GitHub Release from `main`.
+
+For offline local development, you can temporarily switch `inference.source` to `local`.
+
+## API Usage
+
+Run locally:
+
+```bash
+uvicorn src.api:app --host 0.0.0.0 --port 8000
+```
+
+Health check:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Prediction request:
+
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "instances": [
+      {
+        "acousticness": 0.12,
+        "danceability": 0.65,
+        "duration_ms": 200000,
+        "energy": 0.71,
+        "instrumentalness": 0.0,
+        "key": 5,
+        "liveness": 0.11,
+        "loudness": -5.1,
+        "mode": 1,
+        "speechiness": 0.05,
+        "tempo": 120.5,
+        "valence": 0.44
+      }
+    ]
+  }'
+```
+
+You can also call the service from Python:
+
+```bash
+python scripts/call_api.py --url https://your-render-service.onrender.com/predict
+```
+
+## Docker and Deployment
+
+Build the serving image:
+
+```bash
+docker build -t spotify-archetypes-api .
+```
+
+Run it:
+
+```bash
+docker run --rm -p 8000:8000 --env-file .env spotify-archetypes-api
+```
+
+Deployment discipline:
+- `ci.yml` validates pull requests to `main`
+- `deploy.yml` runs only when a GitHub Release is published
+- The deploy workflow expects a `RENDER_DEPLOY_HOOK_URL` repository secret
+
+## Testing
+
+```bash
+pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+```
+
+## Monitoring and Observability
+
+- Console logs for local and CI visibility
+- Persistent local log file at `logs/pipeline.log`
+- W&B run metrics and artifacts
+- Render service logs after deployment
+
+## Simple Model Card
+
+### Intended use
+Estimate expected Spotify track popularity from audio features for ranking support and exploratory prioritization.
+
+### Inputs
+Acousticness, danceability, duration, energy, instrumentalness, key, liveness, loudness, mode, speechiness, tempo, and valence.
+
+### Output
+A continuous popularity prediction.
+
+### Risks
+- Popularity reflects historical platform dynamics, not intrinsic quality.
+- Trends drift over time, so retraining and monitoring are required.
+- Predictions should support, not replace, editorial and ranking guardrails.
+
+### Performance
+Validation and test metrics are written to `reports/metrics.json` and tracked in W&B during pipeline runs.
