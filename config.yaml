@@ -58,7 +58,7 @@ wandb:
   log_predictions: true
 
 inference:
-  source: "wandb"
+  source: "local"
 
 api:
   host: "0.0.0.0"

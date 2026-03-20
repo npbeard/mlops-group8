@@ -78,3 +78,6 @@ def train_model(
 
     model_pipeline.fit(X_train, y_train)
     return model_pipeline
+
+import joblib
+
