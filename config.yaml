@@ -50,7 +50,7 @@ logging:
 
 wandb:
   enabled: true
-  entity: ""
+  entity: "nicopbeard-ie-university"
   project: "spotify-sound-archetypes"
   model_artifact_name: "spotify-popularity-pipeline"
   production_alias: "prod"
