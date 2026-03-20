@@ -79,16 +79,20 @@ Traditional ranking approaches rely heavily on historical engagement signals or 
 ├── notebooks/
 ├── reports/
 ├── scripts/
-│   └── call_api.py
+│   ├── call_api.py
+│   ├── promote_model.py
+│   └── verify_deployment.py
 ├── src/
 │   ├── api.py
 │   ├── clean_data.py
+│   ├── deployment_verifier.py
 │   ├── evaluate.py
 │   ├── features.py
 │   ├── infer.py
 │   ├── load_data.py
 │   ├── logger.py
 │   ├── main.py
+│   ├── model_registry.py
 │   ├── train.py
 │   ├── utils.py
 │   └── validate.py
@@ -166,7 +170,18 @@ Recommended promotion flow:
 2. Promote the approved artifact to alias `prod`.
 3. Deploy only after publishing a GitHub Release from `main`.
 
-For offline local development, you can temporarily switch `inference.source` to `local`.
+Promote the approved candidate with:
+
+```bash
+python scripts/promote_model.py --source latest --target prod
+```
+
+The script prints a JSON summary containing the source reference, promoted
+reference, artifact version, and the aliases applied to that artifact. It uses
+`WANDB_API_KEY` from the current environment or from the project `.env` file.
+
+For offline local development, you can temporarily switch `inference.source` to
+`local`.
 
 ## API Usage
 
@@ -232,6 +247,33 @@ Deployment discipline:
 - `deploy.yml` runs only when a GitHub Release is published
 - The deploy workflow expects a `RENDER_DEPLOY_HOOK_URL` repository secret
 
+## Deployment Verification
+
+Current live service URL:
+
+```text
+https://mlops-group8-1.onrender.com
+```
+
+After Render finishes deploying, verify that the live service is using the
+promoted W&B artifact alias instead of a local model file:
+
+```bash
+python scripts/verify_deployment.py \
+  --base-url https://mlops-group8-1.onrender.com \
+  --expect-source wandb \
+  --expect-alias prod
+```
+
+The verification script checks:
+- `/health` returns `200`, reports `status=ok`, and confirms the model is loaded
+- `/predict` returns `200` with at least one prediction
+- `/predict` reports `model_source=wandb`
+- `/predict` reports a `model_reference` ending in `:prod`
+
+If you want to validate a custom JSON request body, pass
+`--payload-file path/to/request.json`.
+
 ## Testing
 
 ```bash
@@ -263,3 +305,9 @@ A continuous popularity prediction.
 
 ### Performance
 Validation and test metrics are written to `reports/metrics.json` and tracked in W&B during pipeline runs.
+
+## Simple Changelog
+
+- 2026-03-20: Added W&B artifact promotion tooling, deployment smoke-test
+  verification, and documentation for proving the live API serves the promoted
+  `prod` model artifact.
