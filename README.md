@@ -2,63 +2,64 @@
 
 **Author:** Group 8  
 **Course:** MLOps: Master in Business Analytics and Data Science  
-**Status:** Production-oriented final submission
+**Status:** Final project repo
 
 -----
 
 ## Business Case
 
-Music platforms need to decide which tracks deserve promotion in playlists, search surfaces, and recommendation modules. Relying only on historical engagement creates lag, reinforces incumbents, and slows down discovery. This project predicts track popularity from audio features so product, recommendation, and analytics teams can rank songs earlier and more consistently.
+Music platforms always have to decide which songs should get more visibility in playlists, recommendation sections, and discovery pages. If they only react to past engagement, they often notice promising tracks too late and keep favoring songs that are already doing well. In this project, we try to predict Spotify track popularity from audio features so that those decisions can be supported earlier and in a more consistent way.
 
-The business value is operational as much as predictive:
-- Faster experimentation on ranking rules
-- More reproducible model retraining and evaluation
-- Safer deployment through CI, release discipline, and typed API contracts
-- Better traceability through logs, W&B artifacts, and versioned serving
+For us, the value of the project is not only the model itself. A big part of the assignment was showing how that model could be handled in a more realistic MLOps workflow, with testing, tracking, deployment, and reproducibility.
+
+- Faster experimentation on ranking ideas
+- More reproducible retraining and evaluation
+- Safer deployment through CI and release discipline
+- Better traceability through logs, W&B artifacts, and a live API
 
 ### Objective
 
-Develop a supervised machine learning model to predict Spotify track popularity on a 0 to 100 scale using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness. The objective is to identify which audio characteristics are associated with higher popularity and to turn that analysis into a reproducible ML product.
+Our objective is to build a supervised machine learning model that predicts Spotify track popularity on a 0 to 100 scale using measurable audio features such as energy, danceability, valence, tempo, acousticness, and loudness. We also wanted to move the work beyond notebook experimentation and package it as a reproducible ML project.
 
 ### Users
 
-Primary users of this solution are:
+The main users we imagine for this solution are:
 - Product teams
 - Recommendation system engineers
 - Music analytics teams
 
-These stakeholders can use predicted popularity scores to support ranking, playlist ordering, and discovery experiments.
+These stakeholders could use predicted popularity scores to support ranking decisions, playlist ordering, and discovery experiments.
 
 ### What Success Means
 
-- Business KPI: Improve recommendation or playlist engagement by supporting better track ranking decisions, with a target uplift in listening time or completion rate.
-- Technical KPI: Achieve RMSE and MAE that outperform a simple baseline and remain stable across validation and test splits.
-- Operational KPI: Ensure predictions can be reproduced through a single entrypoint, tracked in W&B, served through a validated API contract, and deployed through controlled CI/CD workflows.
-- Acceptance criteria: The pipeline must train, evaluate, register, and serve the model consistently with no manual notebook steps required in production.
+- Business KPI: improve recommendation or playlist engagement by supporting better ranking decisions, ideally increasing listening time or completion rate.
+- Technical KPI: achieve RMSE and MAE that beat a simple baseline and stay stable across validation and test splits.
+- Operational KPI: make sure predictions can be reproduced through one entrypoint, tracked in W&B, served through a validated API contract, and deployed through controlled CI/CD workflows.
+- Acceptance criteria: the pipeline should train, evaluate, register, and serve the model without depending on manual notebook steps for production use.
 
 ### AI vs Non-AI Approach
 
-Traditional ranking approaches rely heavily on historical engagement signals or manual curation. A machine learning approach can surface promising tracks earlier by learning from intrinsic audio properties, while still allowing product teams to combine predictions with editorial or behavioral signals.
+A more traditional approach would rely mostly on historical engagement signals or manual curation. A machine learning approach can help surface promising tracks earlier by learning from the audio properties of the song itself, while still being combined with business rules, editorial decisions, or behavioral data.
 
 ### Risks and Mitigations
 
-- Popularity bias toward already well-known tracks. Mitigation: monitor prediction distributions and compare against baseline ranking logic.
+- Popularity bias toward already well-known tracks. Mitigation: monitor prediction distributions and compare them with simpler ranking logic.
 - Data drift as music trends evolve. Mitigation: retrain periodically and track performance over time in W&B.
 - Overfitting to historical patterns. Mitigation: use validation splits, held-out test evaluation, and reproducible retraining.
-- Misuse in ranking decisions. Mitigation: use predictions as one signal among several, not as the sole ranking mechanism.
+- Misuse in ranking decisions. Mitigation: treat predictions as one signal among several, not as the only ranking mechanism.
 
-## What This Repository Delivers
+## What This Repository Includes
 
 - Modular end-to-end ML pipeline in `src/`
 - Single orchestration entrypoint via `python -m src.main`
 - Centralized non-secret runtime settings in `config.yaml`
 - Secret handling through `.env` and `.env.example`
-- Dual-destination logging to console and local file
+- Logging to both console and local file
 - W&B experiment tracking plus managed model-artifact inference
 - FastAPI service with `/health` and `/predict`
-- Dockerized serving setup with strict `.dockerignore`
+- Dockerized serving setup with a strict `.dockerignore`
 - PR CI workflow and release-gated deploy workflow
-- Tests for core modules and API contract behavior
+- Tests for core modules and API behavior
 
 ## Repository Structure
 
@@ -122,15 +123,15 @@ Copy `.env.example` into `.env` and fill in your W&B API key:
 WANDB_API_KEY=...
 ```
 
-Secrets must never be committed. `.env` is ignored by git and excluded from Docker builds.
+Secrets should never be committed. `.env` is ignored by git and excluded from Docker builds.
 
-Keep non-secret W&B settings such as `entity`, `project`, artifact name, and production alias in `config.yaml`.
+Non-secret W&B settings such as `entity`, `project`, artifact name, and production alias stay in `config.yaml`.
 
 ### 3. Place the raw dataset
 
 The default expected path is `data/raw/SpotifyAudioFeaturesApril2019.csv`.
 
-## Running the Training Pipeline
+## Running The Training Pipeline
 
 ```bash
 python -m src.main
@@ -150,9 +151,9 @@ When W&B is enabled, `src.main` also logs:
 - Model artifact
 - Optional processed-data and prediction artifacts
 
-## Model Registry and Production Inference
+## Model Registry And Production Inference
 
-Training logs a managed W&B model artifact. Production inference is configured to load the artifact aliased `prod`, not an unmanaged local file. That behavior is controlled in `config.yaml`:
+Training logs a managed W&B model artifact. Production inference is configured to load the artifact aliased `prod`, instead of depending on an unmanaged local file. That behavior is controlled in `config.yaml`:
 
 ```yaml
 wandb:
@@ -176,12 +177,9 @@ Promote the approved candidate with:
 python scripts/promote_model.py --source latest --target prod
 ```
 
-The script prints a JSON summary containing the source reference, promoted
-reference, artifact version, and the aliases applied to that artifact. It uses
-`WANDB_API_KEY` from the current environment or from the project `.env` file.
+The script prints a short JSON summary with the source reference, promoted reference, artifact version, and aliases applied to that artifact. It uses `WANDB_API_KEY` from the current environment or from the project `.env` file.
 
-For offline local development, you can temporarily switch `inference.source` to
-`local`.
+For offline local development, `inference.source` can be temporarily switched to `local`.
 
 ## API Usage
 
@@ -228,7 +226,7 @@ You can also call the service from Python:
 python scripts/call_api.py --url https://your-render-service.onrender.com/predict
 ```
 
-## Docker and Deployment
+## Docker And Deployment
 
 Build the serving image:
 
@@ -255,8 +253,7 @@ Current live service URL:
 https://mlops-group8-1.onrender.com
 ```
 
-After Render finishes deploying, verify that the live service is using the
-promoted W&B artifact alias instead of a local model file:
+After Render finishes deploying, you can verify that the live service is using the promoted W&B artifact alias instead of a local model file:
 
 ```bash
 python scripts/verify_deployment.py \
@@ -271,16 +268,15 @@ The verification script checks:
 - `/predict` reports `model_source=wandb`
 - `/predict` reports a `model_reference` ending in `:prod`
 
-If you want to validate a custom JSON request body, pass
-`--payload-file path/to/request.json`.
+If you want to validate a custom JSON request body, you can pass `--payload-file path/to/request.json`.
 
 ## Testing
 
 ```bash
-pytest --cov=src --cov-report=term-missing --cov-fail-under=80
+pytest --cov=src --cov-report=term-missing --cov-fail-under=100
 ```
 
-## Monitoring and Observability
+## Monitoring And Observability
 
 - Console logs for local and CI visibility
 - Persistent local log file at `logs/pipeline.log`
@@ -290,24 +286,18 @@ pytest --cov=src --cov-report=term-missing --cov-fail-under=80
 ## Simple Model Card
 
 ### Intended use
-Estimate expected Spotify track popularity from audio features for ranking support and exploratory prioritization.
+Estimate Spotify track popularity from audio features for ranking support and exploratory prioritization.
 
 ### Inputs
 Acousticness, danceability, duration, energy, instrumentalness, key, liveness, loudness, mode, speechiness, tempo, and valence.
 
 ### Output
-A continuous popularity prediction.
+A continuous popularity prediction score.
 
 ### Risks
 - Popularity reflects historical platform dynamics, not intrinsic quality.
-- Trends drift over time, so retraining and monitoring are required.
+- Trends drift over time, so retraining and monitoring are necessary.
 - Predictions should support, not replace, editorial and ranking guardrails.
 
 ### Performance
 Validation and test metrics are written to `reports/metrics.json` and tracked in W&B during pipeline runs.
-
-## Simple Changelog
-
-- 2026-03-20: Added W&B artifact promotion tooling, deployment smoke-test
-  verification, and documentation for proving the live API serves the promoted
-  `prod` model artifact.

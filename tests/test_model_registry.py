@@ -43,6 +43,49 @@ def test_load_wandb_public_api_raises_when_missing(monkeypatch):
         load_wandb_public_api()
 
 
+def test_load_wandb_public_api_raises_when_api_missing(monkeypatch):
+    class BrokenWandb:
+        pass
+
+    monkeypatch.setattr(
+        "src.model_registry.importlib.import_module",
+        lambda name: BrokenWandb(),
+    )
+
+    with pytest.raises(ImportError, match="does not expose the Api client"):
+        load_wandb_public_api()
+
+
+def test_load_wandb_public_api_returns_module(monkeypatch):
+    class ValidWandb:
+        class Api:
+            pass
+
+    monkeypatch.setattr(
+        "src.model_registry.importlib.import_module",
+        lambda name: ValidWandb(),
+    )
+
+    assert load_wandb_public_api() is not None
+
+
+def test_build_model_artifact_reference_requires_dict_section():
+    with pytest.raises(ValueError, match="wandb section is required"):
+        build_model_artifact_reference({"wandb": "bad"})  # type: ignore[arg-type]
+
+
+def test_build_model_artifact_reference_supports_missing_entity():
+    assert build_model_artifact_reference(
+        {
+            "wandb": {
+                "project": "spotify-sound-archetypes",
+                "model_artifact_name": "spotify-popularity-pipeline",
+                "production_alias": "prod",
+            }
+        }
+    ) == "spotify-sound-archetypes/spotify-popularity-pipeline:prod"
+
+
 def test_promote_model_artifact_adds_target_alias():
     class FakeArtifact:
         def __init__(self):
@@ -102,3 +145,42 @@ def test_promote_model_artifact_requires_save_method():
 
     with pytest.raises(AttributeError, match="save"):
         promote_model_artifact(_config(), wandb_module=FakeWandb())
+
+
+def test_promote_model_artifact_uses_default_aliases():
+    class FakeArtifact:
+        def __init__(self):
+            self.aliases = ["latest", "prod"]
+            self.version = "v12"
+            self.saved = False
+
+        def save(self):
+            self.saved = True
+
+    class FakeApi:
+        def __init__(self):
+            self.artifact_ref = None
+            self.artifact_obj = FakeArtifact()
+
+        def artifact(self, reference):
+            self.artifact_ref = reference
+            return self.artifact_obj
+
+    class FakeWandb:
+        def __init__(self):
+            self.api = FakeApi()
+
+        def Api(self):
+            return self.api
+
+    fake_wandb = FakeWandb()
+    result = promote_model_artifact(
+        _config(),
+        source_alias="",
+        target_alias=None,
+        wandb_module=fake_wandb,
+    )
+
+    assert fake_wandb.api.artifact_ref.endswith(":latest")
+    assert result["promoted_reference"].endswith(":prod")
+    assert result["aliases"].count("prod") == 1
