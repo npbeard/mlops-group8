@@ -5,31 +5,18 @@ from typing import Optional
 
 import joblib  # type: ignore
 import pandas as pd  # type: ignore
+from src.logger import configure_logging
 
 logger = logging.getLogger(__name__)
 
 
 def setup_logging(level: str = "INFO", log_file: Optional[str] = None) -> None:
-    root = logging.getLogger()
-    root.setLevel(level.upper())
-
-    if root.handlers:
+    if not log_file:
+        root = logging.getLogger()
+        root.setLevel(level.upper())
         return
 
-    formatter = logging.Formatter(
-        fmt="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-
-    console = logging.StreamHandler()
-    console.setFormatter(formatter)
-    root.addHandler(console)
-
-    if log_file:
-        Path(log_file).parent.mkdir(parents=True, exist_ok=True)
-        fh = logging.FileHandler(log_file, encoding="utf-8")
-        fh.setFormatter(formatter)
-        root.addHandler(fh)
+    configure_logging(log_level=level, log_file=log_file)
 
 
 def load_csv(filepath: Path) -> pd.DataFrame:
@@ -48,6 +35,7 @@ def load_csv(filepath: Path) -> pd.DataFrame:
         raise
 
     return df
+
 
 def save_csv(df: pd.DataFrame, filepath: Path) -> None:
     """
@@ -80,11 +68,13 @@ def save_model(model, filepath: Path) -> None:
 
     joblib.dump(model, filepath)
 
+
 def save_json(obj: dict, filepath: Path) -> None:
     logger.info("Saving JSON to %s", filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, sort_keys=True)
+
 
 def load_model(filepath: Path):
     logger.info("Loading model from %s", filepath)

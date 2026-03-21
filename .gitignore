@@ -5,6 +5,8 @@ __pycache__/
 
 # Environments
 .env
+.env.*
+!.env.example
 .venv/
 env/
 venv/
@@ -51,3 +53,5 @@ reports/**
 *.pyc
 *.log
 logs/
+wandb/
+.wandb/
