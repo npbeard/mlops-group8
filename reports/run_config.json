@@ -1,4 +1,8 @@
 {
+  "api": {
+    "host": "0.0.0.0",
+    "port": 8000
+  },
   "features": {
     "categorical_onehot": [
       "key",
@@ -20,16 +24,22 @@
       "tempo"
     ]
   },
+  "inference": {
+    "source": "wandb"
+  },
   "logging": {
     "format": "text",
     "level": "INFO"
   },
   "paths": {
+    "artifact_cache_dir": ".artifacts",
     "clean_data": "data/processed/clean.csv",
     "log_file": "logs/pipeline.log",
+    "metrics_path": "reports/metrics.json",
     "model_path": "models/model.joblib",
     "raw_data": "data/raw/SpotifyAudioFeaturesApril2019.csv",
-    "report_path": "reports/predictions.csv"
+    "report_path": "reports/predictions.csv",
+    "run_config_path": "reports/run_config.json"
   },
   "project": {
     "name": "Spotify Sound Archetypes",
@@ -45,9 +55,11 @@
   },
   "wandb": {
     "enabled": true,
+    "entity": "nicopbeard-ie-university",
     "log_predictions": true,
     "log_processed_data": true,
     "model_artifact_name": "spotify-popularity-pipeline",
+    "production_alias": "prod",
     "project": "spotify-sound-archetypes"
   }
 }

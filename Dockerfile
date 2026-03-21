@@ -15,4 +15,4 @@ ENV PORT=8000
 
 EXPOSE 8000
 
-CMD ["micromamba", "run", "-n", "serving", "uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["micromamba", "run", "-n", "serving", "/bin/sh", "-c", "uvicorn src.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
