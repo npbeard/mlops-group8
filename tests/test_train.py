@@ -1,10 +1,10 @@
 import pandas as pd  # type: ignore
 from sklearn.compose import ColumnTransformer  # type: ignore
 from sklearn.preprocessing import StandardScaler  # type: ignore
-import pytest
+import pytest  # type: ignore
 from src.train import train_model
 from src.features import get_feature_preprocessor
-from sklearn.datasets import make_classification
+from sklearn.datasets import make_classification  # type: ignore
 
 
 def test_train_model_minimal():
@@ -18,6 +18,7 @@ def test_train_model_minimal():
 
     assert hasattr(model, "predict")
 
+
 def test_train_model_raises_on_invalid_problem_type():
     X = pd.DataFrame({"x": [1, 2, 3]})
     y = pd.Series([1, 2, 3])
@@ -25,6 +26,7 @@ def test_train_model_raises_on_invalid_problem_type():
 
     with pytest.raises(ValueError):
         train_model(X, y, pre, "clustering", train_config={})
+
 
 def test_train_model_classification_runs():
     X_np, y_np = make_classification(
@@ -43,6 +45,7 @@ def test_train_model_classification_runs():
     model = train_model(X, y, pre, "classification", train_config={})
     assert hasattr(model, "predict")
 
+
 def test_train_model_uses_defaults_when_config_missing():
     X = pd.DataFrame({"x": [1, 2, 3, 4]})
     y = pd.Series([10, 20, 15, 25])
@@ -50,6 +53,7 @@ def test_train_model_uses_defaults_when_config_missing():
 
     model = train_model(X, y, pre, "regression", train_config={})
     assert hasattr(model, "predict")
+
 
 def test_train_model_uses_default_config_when_none():
     X = pd.DataFrame({
@@ -68,28 +72,35 @@ def test_train_model_uses_default_config_when_none():
     model = train_model(X, y, pre, "regression", train_config=None)
     assert hasattr(model, "predict")
 
+
 def test_train_model_defaults_branch_none_config():
     X = pd.DataFrame({"speechiness": [0.1, 0.2], "duration_ms": [1000, 2000]})
     y = pd.Series([10, 20])
 
-    pre = get_feature_preprocessor(["duration_ms"], [], ["speechiness"], n_bins=2)
+    pre = get_feature_preprocessor(
+        ["duration_ms"], [], ["speechiness"], n_bins=2)
 
     model = train_model(X, y, pre, "regression", train_config=None)
     assert hasattr(model, "predict")
+
 
 def test_train_model_none_config_hits_defaults():
     X = pd.DataFrame({"speechiness": [0.1, 0.2], "duration_ms": [1000, 2000]})
     y = pd.Series([10, 20])
-    pre = get_feature_preprocessor(["duration_ms"], [], ["speechiness"], n_bins=2)
+    pre = get_feature_preprocessor(
+        ["duration_ms"], [], ["speechiness"], n_bins=2)
 
     model = train_model(X, y, pre, "regression", train_config=None)
     assert hasattr(model, "predict")
 
+
 def test_train_model_ridge_branch_runs():
-    X = pd.DataFrame({"speechiness": [0.1, 0.2, 0.3], "duration_ms": [1000, 2000, 1500]})
+    X = pd.DataFrame(
+        {"speechiness": [0.1, 0.2, 0.3], "duration_ms": [1000, 2000, 1500]})
     y = pd.Series([10.0, 20.0, 15.0])
 
-    pre = get_feature_preprocessor(["duration_ms"], [], ["speechiness"], n_bins=2)
+    pre = get_feature_preprocessor(
+        ["duration_ms"], [], ["speechiness"], n_bins=2)
 
     model = train_model(
         X, y, pre,
@@ -100,10 +111,13 @@ def test_train_model_ridge_branch_runs():
 
 
 def test_train_model_logreg_branch_runs():
-    X = pd.DataFrame({"speechiness": [0.1, 0.2, 0.3, 0.4], "duration_ms": [1000, 2000, 1500, 1200]})
+    X = pd.DataFrame(
+        {"speechiness": [0.1, 0.2, 0.3, 0.4],
+         "duration_ms": [1000, 2000, 1500, 1200]})
     y = pd.Series([0, 1, 0, 1])
 
-    pre = get_feature_preprocessor(["duration_ms"], [], ["speechiness"], n_bins=2)
+    pre = get_feature_preprocessor(
+        ["duration_ms"], [], ["speechiness"], n_bins=2)
 
     model = train_model(
         X, y, pre,
