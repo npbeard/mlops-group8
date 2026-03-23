@@ -39,7 +39,9 @@ def _load_wandb_module():
         ) from exc
 
     if not hasattr(wandb_module, "Api"):
-        raise ImportError("Imported wandb module does not expose the Api client.")
+        raise ImportError(
+            "Imported wandb module does not expose the Api client."
+        )
 
     return wandb_module
 
@@ -47,7 +49,9 @@ def _load_wandb_module():
 def _build_wandb_artifact_reference(config: dict[str, Any]) -> str:
     wandb_cfg = config.get("wandb", {})
     if not isinstance(wandb_cfg, dict):
-        raise ValueError("config.yaml: wandb section is required for W&B inference")
+        raise ValueError(
+            "config.yaml: wandb section is required for W&B inference"
+        )
 
     entity = str(wandb_cfg.get("entity", "")).strip()
     project = str(wandb_cfg.get("project", "")).strip()
@@ -66,12 +70,13 @@ def _build_wandb_artifact_reference(config: dict[str, Any]) -> str:
 
 
 def _find_downloaded_model(artifact_dir: Path) -> Path:
-    model_candidates = sorted(artifact_dir.rglob("*.joblib"))
-    if not model_candidates:
+    if not (model_candidates := sorted(artifact_dir.rglob("*.joblib"))):
         raise FileNotFoundError(
-            f"No .joblib model file was found in downloaded artifact: {artifact_dir}"
+            f"No .joblib model file was found in downloaded artifact: "
+            f"{artifact_dir}"
         )
-    return model_candidates[0]
+    else:
+        return model_candidates[0]
 
 
 def load_inference_model(
@@ -82,9 +87,9 @@ def load_inference_model(
 ) -> tuple[Any, dict[str, str]]:
     """
     Load the model used by the serving layer.
-
-    In production, inference is expected to use the promoted W&B artifact aliased
-    'prod'. Local model loading is still supported for offline development.
+    In production, inference is expected to use the promoted W&B artifact
+    aliased 'prod'. Local model loading is still supported for offline
+    development.
     """
     project_root = project_root or Path(__file__).resolve().parents[1]
     source = _get_inference_source(config)
@@ -102,7 +107,8 @@ def load_inference_model(
 
     if source != "wandb":
         raise ValueError(
-            f"Unsupported inference.source '{source}'. Expected 'local' or 'wandb'."
+            f"Unsupported inference.source '{source}'. "
+            f"Expected 'local' or 'wandb'."
         )
 
     active_wandb = wandb_module or _load_wandb_module()

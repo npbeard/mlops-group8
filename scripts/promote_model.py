@@ -10,12 +10,12 @@ import json
 from pathlib import Path
 import sys
 
+from src.main import load_config
+from src.model_registry import promote_model_artifact
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-
-from src.main import load_config
-from src.model_registry import promote_model_artifact
 
 try:
     from dotenv import load_dotenv
@@ -33,7 +33,8 @@ def main() -> None:
     parser.add_argument(
         "--source",
         default="latest",
-        help="Candidate alias or version to promote, for example latest or v12",
+        help="Candidate alias or version to promote, "
+             "for example latest or v12",
     )
     parser.add_argument(
         "--target",
@@ -44,7 +45,10 @@ def main() -> None:
 
     config_path = Path(args.config)
     if load_dotenv is not None:
-        load_dotenv(dotenv_path=config_path.resolve().parent / ".env", override=False)
+        load_dotenv(
+            dotenv_path=config_path.resolve().parent / ".env",
+            override=False,
+        )
 
     config = load_config(config_path)
     result = promote_model_artifact(

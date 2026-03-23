@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient  # type: ignore
 
 from src.api import create_app
 
@@ -18,7 +18,9 @@ def _config(tmp_path: Path) -> dict:
             "target_column": "popularity",
         },
         "paths": {
-            "raw_data": str(tmp_path / "data" / "raw" / "SpotifyAudioFeaturesApril2019.csv"),
+            "raw_data": str(
+                tmp_path / "data" / "raw" / "SpotifyAudioFeaturesApril2019.csv"
+            ),
             "clean_data": str(tmp_path / "data" / "processed" / "clean.csv"),
             "model_path": str(tmp_path / "models" / "model.joblib"),
             "report_path": str(tmp_path / "reports" / "predictions.csv"),
