@@ -60,7 +60,7 @@ def _build_wandb_artifact_reference(config: dict[str, Any]) -> str:
 
     if not project or not artifact_name:
         raise ValueError(
-            "config.yaml: wandb.model_artifact_name are required "
+            "config.yaml: wandb.project and wandb.model_artifact_name are required "
             "for W&B-backed inference"
         )
 

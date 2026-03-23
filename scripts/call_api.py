@@ -3,7 +3,7 @@ Minimal client for sending JSON requests to the deployed FastAPI service.
 
 Usage:
 python scripts/call_api.py --url \
-    https://your-render-service.onrender.com/predict
+    https://mlops-group8-1.onrender.com/predict
 """
 
 import argparse
@@ -36,7 +36,9 @@ def main() -> None:
         description="Send a prediction request."
     )
     parser.add_argument(
-        "--url", required=True, help="Full /predict endpoint URL"
+        "--url",
+        default="https://mlops-group8-1.onrender.com/predict",
+        help="Full /predict endpoint URL",
     )
     args = parser.parse_args()
 

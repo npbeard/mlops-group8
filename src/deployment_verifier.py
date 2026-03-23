@@ -122,7 +122,7 @@ def verify_deployment(
         health_body.get("model_loaded") is not True
     ):
         raise ValueError(
-            f"/health did not confirm a loaded model: {health_body}"
+            f"/health indicates the model is not loaded: {health_body}"
         )
     if expected_source and health_body.get("model_source") != expected_source:
         raise ValueError(

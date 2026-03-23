@@ -4,7 +4,7 @@ promoted model.
 
 Usage:
 python scripts/verify_deployment.py \
-    --base-url https://your-render-service.onrender.com
+    --base-url https://mlops-group8-1.onrender.com
 """
 
 import argparse
@@ -31,10 +31,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--base-url",
-        required=True,
+        default="https://mlops-group8-1.onrender.com",
         help=(
             "Base deployment URL, for example "
-            "https://your-render-service.onrender.com"
+            "https://mlops-group8-1.onrender.com"
         ),
     )
     parser.add_argument(
