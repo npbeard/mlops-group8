@@ -178,6 +178,10 @@ def test_request_json_raises_clear_connection_error(monkeypatch):
 
 def test_parse_response_body_handles_empty_and_scalar_json():
     assert _parse_response_body("") == {}
+    assert _parse_response_body("[1, 2]") == {
+        "json_value": [1, 2],
+        "is_json": True,
+    }
 
 
 def test_verify_deployment_rejects_bad_health_and_predict_states():
@@ -214,6 +218,19 @@ def test_verify_deployment_rejects_bad_health_and_predict_states():
         verify_deployment(
             "https://service.onrender.com",
             request_fn=model_not_loaded,
+        )
+
+    def health_source_bad(url, method, payload, timeout):
+        return 200, {
+            "status": "ok",
+            "model_loaded": True,
+            "model_source": "local",
+        }
+
+    with pytest.raises(ValueError, match="unexpected model source"):
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=health_source_bad,
         )
 
 
