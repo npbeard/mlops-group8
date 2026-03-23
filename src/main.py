@@ -32,6 +32,7 @@ try:
 except ImportError:  # pragma: no cover - optional dependency at runtime
     load_dotenv = None
 
+
 def load_config(config_path: Path) -> dict[str, Any]:
     with open(config_path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -44,7 +45,11 @@ def resolve_repo_path(project_root: Path, configured_path: str) -> Path:
 
 def _wandb_is_enabled(cfg: dict[str, Any]) -> bool:
     wandb_cfg = cfg.get("wandb")
-    return isinstance(wandb_cfg, dict) and bool(wandb_cfg.get("enabled", False))
+    return isinstance(
+        wandb_cfg, dict
+    ) and bool(
+        wandb_cfg.get("enabled", False)
+    )
 
 
 def _wandb_get_str(cfg: dict[str, Any], key: str, default: str = "") -> str:
@@ -55,7 +60,11 @@ def _wandb_get_str(cfg: dict[str, Any], key: str, default: str = "") -> str:
     return str(value).strip() if value is not None else default
 
 
-def _wandb_get_bool(cfg: dict[str, Any], key: str, default: bool = False) -> bool:
+def _wandb_get_bool(
+    cfg: dict[str, Any],
+    key: str,
+    default: bool = False
+) -> bool:
     wandb_cfg = cfg.get("wandb")
     if not isinstance(wandb_cfg, dict):
         return default
@@ -72,10 +81,11 @@ def _load_wandb_module(project_root: Path):
         return None
 
     required_attrs = ["init", "Artifact", "log", "log_artifact", "finish"]
-    missing_attrs = [
-        attr for attr in required_attrs if not hasattr(wandb_module, attr)
-    ]
-    if missing_attrs:
+    if (missing_attrs := [
+        attr
+        for attr in required_attrs
+        if not hasattr(wandb_module, attr)
+    ]):
         module_locations = [
             str(path)
             for path in getattr(wandb_module, "__path__", [])
@@ -93,7 +103,9 @@ def _load_wandb_module(project_root: Path):
                 ]
                 wandb_module = importlib.import_module("wandb")
                 missing_attrs = [
-                    attr for attr in required_attrs if not hasattr(wandb_module, attr)
+                    attr
+                    for attr in required_attrs
+                    if not hasattr(wandb_module, attr)
                 ]
             finally:
                 sys.path = original_sys_path
@@ -112,6 +124,7 @@ def _load_wandb_module(project_root: Path):
 
 
 def main(config: dict[str, Any] | None = None) -> int:
+    # sourcery skip: low-code-quality
     project_root = Path(__file__).resolve().parents[1]
     cfg = config or load_config(project_root / "config.yaml")
 
@@ -119,7 +132,9 @@ def main(config: dict[str, Any] | None = None) -> int:
         load_dotenv(dotenv_path=project_root / ".env", override=False)
 
     log_level = str(cfg.get("logging", {}).get("level", "INFO"))
-    log_file_cfg = str(cfg.get("paths", {}).get("log_file", "logs/pipeline.log"))
+    log_file_cfg = str(
+        cfg.get("paths", {}).get("log_file", "logs/pipeline.log")
+    )
     log_file_path = resolve_repo_path(project_root, log_file_cfg)
     configure_logging(log_level=log_level, log_file=log_file_path)
 
@@ -133,8 +148,16 @@ def main(config: dict[str, Any] | None = None) -> int:
         )
 
         # 1. Infrastructure Setup
-        for folder_key in ["clean_data", "model_path", "report_path", "log_file"]:
-            resolve_repo_path(project_root, cfg["paths"][folder_key]).parent.mkdir(
+        for folder_key in [
+            "clean_data",
+            "model_path",
+            "report_path",
+            "log_file",
+        ]:
+            resolve_repo_path(
+                project_root,
+                cfg["paths"][folder_key]
+            ).parent.mkdir(
                 parents=True,
                 exist_ok=True,
             )
@@ -144,18 +167,24 @@ def main(config: dict[str, Any] | None = None) -> int:
             wandb_module = _load_wandb_module(project_root)
             if wandb_module is None:
                 raise ImportError(
-                    "wandb is enabled in config.yaml but the package is not installed."
+                    "wandb is enabled in config.yaml"
+                    "but the package is not installed."
                 )
 
             wandb_project = _wandb_get_str(cfg, "project")
             if not wandb_project:
                 raise ValueError(
-                    "config.yaml: wandb.project must be set when wandb.enabled is true"
+                    "config.yaml:"
+                    "wandb.project must be set when wandb.enabled is true"
                 )
 
-            if not os.getenv("WANDB_API_KEY") and os.getenv("WANDB_MODE", "") != "offline":
+            if (
+                not os.getenv("WANDB_API_KEY")
+                and os.getenv("WANDB_MODE", "") != "offline"
+            ):
                 logger.warning(
-                    "WANDB_API_KEY is not set. W&B may prompt for authentication."
+                    "WANDB_API_KEY is not set. "
+                    "W&B may prompt for authentication."
                 )
 
             wandb_run = wandb_module.init(
@@ -172,14 +201,24 @@ def main(config: dict[str, Any] | None = None) -> int:
             logger.info("W&B disabled, continuing without experiment tracking")
 
         # 2. Load
-        raw_data_path = resolve_repo_path(project_root, cfg["paths"]["raw_data"])
-        processed_data_path = resolve_repo_path(project_root, cfg["paths"]["clean_data"])
-        model_artifact_path = resolve_repo_path(project_root, cfg["paths"]["model_path"])
+        raw_data_path = resolve_repo_path(
+            project_root, cfg["paths"]["raw_data"]
+        )
+        processed_data_path = resolve_repo_path(
+            project_root, cfg["paths"]["clean_data"]
+        )
+        model_artifact_path = resolve_repo_path(
+            project_root, cfg["paths"]["model_path"]
+        )
         predictions_artifact_path = resolve_repo_path(
             project_root, cfg["paths"]["report_path"]
         )
-        metrics_path = resolve_repo_path(project_root, cfg["paths"]["metrics_path"])
-        run_config_path = resolve_repo_path(project_root, cfg["paths"]["run_config_path"])
+        metrics_path = resolve_repo_path(
+            project_root, cfg["paths"]["metrics_path"]
+        )
+        run_config_path = resolve_repo_path(
+            project_root, cfg["paths"]["run_config_path"]
+        )
 
         df_raw = load_data.load_raw_data(raw_data_path)
         if wandb_run is not None:
@@ -222,7 +261,9 @@ def main(config: dict[str, Any] | None = None) -> int:
         val_size = cfg["train"].get("val_size", 0.2)
         seed = cfg["train"]["seed"]
 
-        strat = y if cfg["project"]["problem_type"] == "classification" else None
+        strat = (
+            y if cfg["project"]["problem_type"] == "classification" else None
+        )
 
         X_trainval, X_test, y_trainval, y_test = train_test_split(
             X,
@@ -307,7 +348,10 @@ def main(config: dict[str, Any] | None = None) -> int:
         )
         if wandb_run is not None:
             wandb_module.log(
-                {f"metrics/test/{k}": float(v) for k, v in test_metrics.items()}
+                {
+                    f"metrics/test/{k}": float(v)
+                    for k, v in test_metrics.items()
+                }
             )
 
         metrics = {"val": val_metrics, "test": test_metrics}
@@ -321,7 +365,9 @@ def main(config: dict[str, Any] | None = None) -> int:
             model_artifact = wandb_module.Artifact(
                 name=model_artifact_name,
                 type="model",
-                description="Scikit-learn pipeline (preprocessing + estimator)",
+                description=(
+                    "Scikit-learn pipeline (preprocessing + estimator)"
+                ),
             )
             model_artifact.add_file(str(model_artifact_path))
             wandb_module.log_artifact(model_artifact)
@@ -330,7 +376,10 @@ def main(config: dict[str, Any] | None = None) -> int:
                 data_artifact = wandb_module.Artifact(
                     name=f"{model_artifact_name}-processed-data",
                     type="dataset",
-                    description="Processed training dataset written by the factory pipeline",
+                    description=(
+                        "Processed training dataset written by the"
+                        " factory pipeline"
+                    ),
                 )
                 data_artifact.add_file(str(processed_data_path))
                 wandb_module.log_artifact(data_artifact)
@@ -348,7 +397,9 @@ def main(config: dict[str, Any] | None = None) -> int:
             pred_artifact = wandb_module.Artifact(
                 name=f"{model_artifact_name}-predictions",
                 type="predictions",
-                description="Inference outputs written by the factory pipeline",
+                description=(
+                    "Inference outputs written by the factory pipeline"
+                ),
             )
             pred_artifact.add_file(str(predictions_artifact_path))
             wandb_module.log_artifact(pred_artifact)

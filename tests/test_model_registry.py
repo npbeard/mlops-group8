@@ -29,7 +29,9 @@ def test_build_model_artifact_reference_defaults_to_production_alias():
 
 
 def test_build_model_artifact_reference_requires_project_and_artifact_name():
-    with pytest.raises(ValueError, match="wandb.project and wandb.model_artifact_name"):
+    with pytest.raises(
+        ValueError, match="wandb.project and wandb.model_artifact_name"
+    ):
         build_model_artifact_reference({"wandb": {"entity": "group8"}})
 
 
@@ -71,7 +73,9 @@ def test_load_wandb_public_api_returns_module(monkeypatch):
 
 def test_build_model_artifact_reference_requires_dict_section():
     with pytest.raises(ValueError, match="wandb section is required"):
-        build_model_artifact_reference({"wandb": "bad"})  # type: ignore[arg-type]
+        build_model_artifact_reference(
+            {"wandb": "bad"}  # type: ignore[arg-type]
+        )
 
 
 def test_build_model_artifact_reference_supports_missing_entity():

@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd  # type: ignore
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException  # type: ignore
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.infer import load_inference_model, run_inference

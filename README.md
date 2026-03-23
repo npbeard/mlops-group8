@@ -223,7 +223,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 You can also call the service from Python:
 
 ```bash
-python scripts/call_api.py --url https://your-render-service.onrender.com/predict
+python scripts/call_api.py --url https://mlops-group8-1.onrender.com/predict
 ```
 
 ## Docker And Deployment

@@ -34,7 +34,9 @@ def _base_settings(tmp_path, *, wandb_enabled=False):
             "target_column": "popularity",
         },
         "paths": {
-            "raw_data": str(tmp_path / "data" / "raw" / "SpotifyAudioFeaturesApril2019.csv"),
+            "raw_data": str(
+                tmp_path / "data" / "raw" / "SpotifyAudioFeaturesApril2019.csv"
+            ),
             "clean_data": str(tmp_path / "data" / "processed" / "clean.csv"),
             "model_path": str(tmp_path / "models" / "model.joblib"),
             "report_path": str(tmp_path / "reports" / "predictions.csv"),
@@ -189,7 +191,11 @@ def test_main_pipeline_smoke(tmp_path, monkeypatch):
         forced = reports_dir / filepath.name  # metrics.json / run_config.json
         return real_save_json(obj, forced)
 
-    monkeypatch.setattr(main_mod, "save_json", save_json_to_tmp)
+    monkeypatch.setattr(
+        main_mod,
+        "save_json",
+        save_json_to_tmp
+    )
 
     # run pipeline
     main_mod.main(settings)
@@ -208,7 +214,11 @@ def test_main_logs_and_raises_on_failure(monkeypatch):
     def boom(*args, **kwargs):
         raise RuntimeError("boom")
 
-    monkeypatch.setattr(main_mod.load_data, "load_raw_data", boom)
+    monkeypatch.setattr(
+        main_mod.load_data,
+        "load_raw_data",
+        boom
+    )
 
     with pytest.raises(RuntimeError, match="boom"):
         main_mod.main(_base_settings(Path.cwd()))
@@ -224,35 +234,68 @@ def test_load_config_reads_yaml(tmp_path):
 
 def test_resolve_repo_path_handles_relative_and_absolute(tmp_path):
     absolute = tmp_path / "absolute.txt"
-    assert main_mod.resolve_repo_path(tmp_path, "relative.txt") == tmp_path / "relative.txt"
+    expected_relative = tmp_path / "relative.txt"
+    assert main_mod.resolve_repo_path(tmp_path, "relative.txt") == (
+        expected_relative
+    )
     assert main_mod.resolve_repo_path(tmp_path, str(absolute)) == absolute
 
 
 def test_wandb_helpers_handle_missing_or_empty_config():
     assert main_mod._wandb_is_enabled({}) is False
     assert main_mod._wandb_is_enabled({"wandb": {"enabled": True}}) is True
-    assert main_mod._wandb_get_str({}, "project", default="fallback") == "fallback"
-    assert main_mod._wandb_get_str({"wandb": {"project": None}}, "project", default="fallback") == "fallback"
+    assert (
+        main_mod._wandb_get_str(
+            {}, "project", default="fallback"
+        ) == "fallback"
+    )
+    assert (
+        main_mod._wandb_get_str(
+            {"wandb": {"project": None}}, "project", default="fallback"
+        )
+        == "fallback"
+    )
     assert main_mod._wandb_get_bool({}, "enabled", default=True) is True
-    assert main_mod._wandb_get_bool({"wandb": {"enabled": 0}}, "enabled", default=True) is False
+    assert (
+        main_mod._wandb_get_bool(
+            {"wandb": {"enabled": 0}}, "enabled", default=True
+        )
+        is False
+    )
 
 
 def test_load_wandb_module_returns_none_when_missing(monkeypatch):
     def boom(name):
         raise ImportError
 
-    monkeypatch.setattr(main_mod.importlib, "import_module", boom)
+    monkeypatch.setattr(
+        main_mod.importlib,
+        "import_module",
+        boom
+    )
+
     assert main_mod._load_wandb_module(Path.cwd()) is None
 
 
-def test_load_wandb_module_restores_existing_module_on_import_error(monkeypatch):
+def test_load_wandb_module_restores_existing_module_on_import_error(
+    monkeypatch,
+):
     sentinel = object()
 
     def boom(name):
         raise ImportError
 
-    monkeypatch.setitem(main_mod.sys.modules, "wandb", sentinel)
-    monkeypatch.setattr(main_mod.importlib, "import_module", boom)
+    monkeypatch.setitem(
+        main_mod.sys.modules,
+        "wandb",
+        sentinel
+    )
+
+    monkeypatch.setattr(
+        main_mod.importlib,
+        "import_module",
+        boom
+    )
 
     assert main_mod._load_wandb_module(Path.cwd()) is None
     assert main_mod.sys.modules["wandb"] is sentinel
@@ -265,11 +308,15 @@ def test_load_wandb_module_raises_for_incomplete_package(monkeypatch):
         lambda name: BrokenWandb(),
     )
 
-    with pytest.raises(ImportError, match="not a usable Weights & Biases package"):
+    with pytest.raises(
+        ImportError, match="not a usable Weights & Biases package"
+    ):
         main_mod._load_wandb_module(Path.cwd())
 
 
-def test_load_wandb_module_recovers_from_local_wandb_namespace(tmp_path, monkeypatch):
+def test_load_wandb_module_recovers_from_local_wandb_namespace(
+    tmp_path, monkeypatch
+):
     class NamespaceWandb:
         __file__ = None
         __path__ = [str(tmp_path / "wandb")]
@@ -279,13 +326,25 @@ def test_load_wandb_module_recovers_from_local_wandb_namespace(tmp_path, monkeyp
 
     def fake_import(name):
         calls["count"] += 1
-        if calls["count"] == 1:
-            return NamespaceWandb()
-        return fake_wandb
+        return NamespaceWandb() if calls["count"] == 1 else fake_wandb
 
-    monkeypatch.setattr(main_mod.importlib, "import_module", fake_import)
-    monkeypatch.setattr(main_mod.sys, "path", [str(tmp_path), "/site-packages"])
-    monkeypatch.setattr(main_mod.sys, "modules", {})
+    monkeypatch.setattr(
+        main_mod.importlib,
+        "import_module",
+        fake_import
+    )
+
+    monkeypatch.setattr(
+        main_mod.sys,
+        "path",
+        [str(tmp_path), "/site-packages"],
+    )
+
+    monkeypatch.setattr(
+        main_mod.sys,
+        "modules",
+        {}
+    )
 
     assert main_mod._load_wandb_module(tmp_path) is fake_wandb
 
@@ -301,36 +360,118 @@ def test_load_wandb_module_returns_valid_module_without_recovery(monkeypatch):
     assert main_mod._load_wandb_module(Path.cwd()) is fake_wandb
 
 
-def test_main_loads_config_and_dotenv_when_config_not_passed(tmp_path, monkeypatch):
+def test_main_loads_config_and_dotenv_when_config_not_passed(
+    tmp_path, monkeypatch
+):
     settings = _base_settings(tmp_path)
     df = _tiny_df()
     dotenv_calls = []
     configured = []
 
-    monkeypatch.setattr(main_mod, "load_config", lambda path: settings)
-    monkeypatch.setattr(main_mod, "load_dotenv", lambda **kwargs: dotenv_calls.append(kwargs))
-    monkeypatch.setattr(main_mod, "configure_logging", lambda **kwargs: configured.append(kwargs))
-    monkeypatch.setattr(main_mod.load_data, "load_raw_data", lambda path: df)
-    monkeypatch.setattr(main_mod.clean_data, "clean_dataframe", lambda frame, target: frame)
-    monkeypatch.setattr(main_mod.validate, "validate_dataframe", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod.features, "get_feature_preprocessor", lambda **kwargs: object())
-    monkeypatch.setattr(main_mod.train, "train_model", lambda *args, **kwargs: DummyModel())
-    monkeypatch.setattr(main_mod.evaluate, "evaluate_model", lambda *args, **kwargs: {"rmse": 1.0})
-    monkeypatch.setattr(main_mod.infer, "run_inference", lambda *args, **kwargs: pd.DataFrame({"prediction": [1]}))
-    monkeypatch.setattr(main_mod, "save_csv", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod, "save_model", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod, "save_json", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        main_mod,
+        "load_config",
+        lambda path: settings
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "load_dotenv",
+        lambda **kwargs: dotenv_calls.append(kwargs)
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "configure_logging",
+        lambda **kwargs: configured.append(kwargs),
+    )
+
+    monkeypatch.setattr(
+        main_mod.load_data,
+        "load_raw_data",
+        lambda path: df
+    )
+
+    monkeypatch.setattr(
+        main_mod.clean_data,
+        "clean_dataframe",
+        lambda frame, target: frame,
+    )
+
+    monkeypatch.setattr(
+        main_mod.validate,
+        "validate_dataframe",
+        lambda *args, **kwargs: None,
+    )
+
+    monkeypatch.setattr(
+        main_mod.features,
+        "get_feature_preprocessor",
+        lambda **kwargs: object(),
+    )
+
+    monkeypatch.setattr(
+        main_mod.train,
+        "train_model",
+        lambda *args, **kwargs: DummyModel()
+    )
+
+    monkeypatch.setattr(
+        main_mod.evaluate,
+        "evaluate_model",
+        lambda *args, **kwargs: {"rmse": 1.0}
+    )
+
+    monkeypatch.setattr(
+        main_mod.infer,
+        "run_inference",
+        lambda *args, **kwargs: pd.DataFrame({"prediction": [1]})
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "save_csv",
+        lambda *args, **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "save_model",
+        lambda *args, **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "save_json",
+        lambda *args, **kwargs: None
+    )
 
     assert main_mod.main() == 0
     assert dotenv_calls
     assert configured[0]["log_level"] == "INFO"
 
 
-def test_main_raises_when_wandb_enabled_but_package_missing(tmp_path, monkeypatch):
+def test_main_raises_when_wandb_enabled_but_package_missing(
+    tmp_path, monkeypatch
+):
     settings = _base_settings(tmp_path, wandb_enabled=True)
-    monkeypatch.setattr(main_mod, "_load_wandb_module", lambda project_root: None)
-    monkeypatch.setattr(main_mod, "configure_logging", lambda **kwargs: None)
-    monkeypatch.setattr(main_mod, "load_dotenv", None)
+    monkeypatch.setattr(
+        main_mod,
+        "_load_wandb_module",
+        lambda project_root: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "configure_logging",
+        lambda **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "load_dotenv",
+        None
+    )
 
     with pytest.raises(ImportError, match="wandb is enabled"):
         main_mod.main(settings)
@@ -339,9 +480,24 @@ def test_main_raises_when_wandb_enabled_but_package_missing(tmp_path, monkeypatc
 def test_main_raises_when_wandb_project_missing(tmp_path, monkeypatch):
     settings = _base_settings(tmp_path, wandb_enabled=True)
     settings["wandb"]["project"] = "   "
-    monkeypatch.setattr(main_mod, "_load_wandb_module", lambda project_root: FakeWandb())
-    monkeypatch.setattr(main_mod, "configure_logging", lambda **kwargs: None)
-    monkeypatch.setattr(main_mod, "load_dotenv", None)
+
+    monkeypatch.setattr(
+        main_mod,
+        "_load_wandb_module",
+        lambda project_root: FakeWandb()
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "configure_logging",
+        lambda **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "load_dotenv",
+        None
+    )
 
     with pytest.raises(ValueError, match="wandb.project must be set"):
         main_mod.main(settings)
@@ -356,34 +512,80 @@ def test_main_wandb_logs_artifacts_and_predictions(tmp_path, monkeypatch):
 
     monkeypatch.delenv("WANDB_API_KEY", raising=False)
     monkeypatch.setenv("WANDB_MODE", "online")
-    monkeypatch.setattr(main_mod, "_load_wandb_module", lambda project_root: fake_wandb)
-    monkeypatch.setattr(main_mod, "load_dotenv", None)
-    monkeypatch.setattr(main_mod, "configure_logging", lambda **kwargs: None)
-    monkeypatch.setattr(main_mod.load_data, "load_raw_data", lambda path: df)
-    monkeypatch.setattr(main_mod.clean_data, "clean_dataframe", lambda frame, target: frame)
-    monkeypatch.setattr(main_mod.validate, "validate_dataframe", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod.features, "get_feature_preprocessor", lambda **kwargs: object())
-    monkeypatch.setattr(main_mod.train, "train_model", lambda *args, **kwargs: DummyModel())
+
+    monkeypatch.setattr(
+        main_mod,
+        "_load_wandb_module",
+        lambda project_root: fake_wandb
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "load_dotenv",
+        None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "configure_logging",
+        lambda **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod.load_data,
+        "load_raw_data",
+        lambda path: df
+    )
+
+    monkeypatch.setattr(
+        main_mod.clean_data,
+        "clean_dataframe",
+        lambda frame, target: frame
+    )
+
+    monkeypatch.setattr(
+        main_mod.validate,
+        "validate_dataframe",
+        lambda *args, **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod.features,
+        "get_feature_preprocessor",
+        lambda **kwargs: object()
+    )
+
+    monkeypatch.setattr(
+        main_mod.train,
+        "train_model",
+        lambda *args, **kwargs: DummyModel()
+    )
+
     monkeypatch.setattr(
         main_mod,
         "save_model",
         lambda model, path: path.write_text("model", encoding="utf-8"),
     )
+
     monkeypatch.setattr(
         main_mod,
         "save_csv",
-        lambda frame, path: path.write_text(frame.to_csv(index=False), encoding="utf-8"),
+        lambda frame,
+        path: path.write_text(frame.to_csv(index=False), encoding="utf-8"),
     )
+
     monkeypatch.setattr(
         main_mod,
         "save_json",
         lambda obj, path: path.write_text("{}", encoding="utf-8"),
     )
+
     monkeypatch.setattr(
         main_mod.evaluate,
         "evaluate_model",
         lambda *args, **kwargs: {"rmse": 1.0, "mae": 0.5},
     )
+
     monkeypatch.setattr(
         main_mod.infer,
         "run_inference",
@@ -404,22 +606,67 @@ def test_main_finishes_wandb_with_error_code_on_failure(tmp_path, monkeypatch):
     fake_wandb = FakeWandb()
 
     monkeypatch.setenv("WANDB_API_KEY", "token")
-    monkeypatch.setattr(main_mod, "_load_wandb_module", lambda project_root: fake_wandb)
-    monkeypatch.setattr(main_mod, "load_dotenv", None)
-    monkeypatch.setattr(main_mod, "configure_logging", lambda **kwargs: None)
-    monkeypatch.setattr(main_mod.load_data, "load_raw_data", lambda path: _tiny_df())
-    monkeypatch.setattr(main_mod.clean_data, "clean_dataframe", lambda frame, target: frame)
-    monkeypatch.setattr(main_mod.validate, "validate_dataframe", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod.features, "get_feature_preprocessor", lambda **kwargs: object())
-    monkeypatch.setattr(main_mod.train, "train_model", lambda *args, **kwargs: DummyModel())
+    monkeypatch.setattr(
+        main_mod,
+        "_load_wandb_module",
+        lambda project_root: fake_wandb
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "load_dotenv",
+        None
+    )
+
+    monkeypatch.setattr(
+        main_mod, "configure_logging", lambda **kwargs: None)
+
+    monkeypatch.setattr(
+        main_mod.load_data, "load_raw_data", lambda path: _tiny_df())
+
+    monkeypatch.setattr(
+        main_mod.clean_data, "clean_dataframe", lambda frame, target: frame)
+
+    monkeypatch.setattr(
+        main_mod.validate, "validate_dataframe", lambda *args, **kwargs: None)
+
+    monkeypatch.setattr(
+        main_mod.features,
+        "get_feature_preprocessor",
+        lambda **kwargs: object())
+
+    monkeypatch.setattr(
+        main_mod.train, "train_model", lambda *args, **kwargs: DummyModel())
+
+    def _raise_eval_failed(*args, **kwargs):
+        raise RuntimeError("eval failed")
+
     monkeypatch.setattr(
         main_mod.evaluate,
         "evaluate_model",
-        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("eval failed")),
+        _raise_eval_failed,
     )
-    monkeypatch.setattr(main_mod, "save_csv", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod, "save_model", lambda *args, **kwargs: None)
-    monkeypatch.setattr(main_mod, "save_json", lambda *args, **kwargs: None)
+
+    monkeypatch.setattr(
+        main_mod,
+        "save_csv",
+        lambda *args,
+        **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "save_model",
+        lambda *args,
+        **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        main_mod,
+        "save_json",
+        lambda *args,
+        **kwargs: None
+    )
 
     with pytest.raises(RuntimeError, match="eval failed"):
         main_mod.main(settings)
@@ -433,14 +680,42 @@ def test_module_entrypoint_calls_main(monkeypatch, tmp_path):
     configured = []
 
     monkeypatch.setattr(yaml, "safe_load", lambda stream: settings)
-    monkeypatch.setattr(logger_mod, "configure_logging", lambda **kwargs: configured.append(kwargs))
-    monkeypatch.setattr(load_data_mod, "load_raw_data", lambda path: df)
-    monkeypatch.setattr(clean_data_mod, "clean_dataframe", lambda frame, target: frame)
-    monkeypatch.setattr(validate_mod, "validate_dataframe", lambda *args, **kwargs: None)
-    monkeypatch.setattr(features_mod, "get_feature_preprocessor", lambda **kwargs: object())
-    monkeypatch.setattr(train_mod, "train_model", lambda *args, **kwargs: DummyModel())
-    monkeypatch.setattr(evaluate_mod, "evaluate_model", lambda *args, **kwargs: {"rmse": 1.0})
-    monkeypatch.setattr(infer_mod, "run_inference", lambda *args, **kwargs: pd.DataFrame({"prediction": [1]}))
+
+    monkeypatch.setattr(
+        logger_mod, "configure_logging",
+        lambda **kwargs: configured.append(kwargs)
+    )
+
+    monkeypatch.setattr(
+        load_data_mod, "load_raw_data", lambda path: df
+    )
+
+    monkeypatch.setattr(
+        clean_data_mod, "clean_dataframe", lambda frame, target: frame
+    )
+
+    monkeypatch.setattr(
+        validate_mod, "validate_dataframe", lambda *args, **kwargs: None
+    )
+
+    monkeypatch.setattr(
+        features_mod, "get_feature_preprocessor", lambda **kwargs: object()
+    )
+
+    monkeypatch.setattr(
+        train_mod, "train_model", lambda *args, **kwargs: DummyModel()
+    )
+
+    monkeypatch.setattr(
+        evaluate_mod, "evaluate_model", lambda *args, **kwargs: {"rmse": 1.0}
+    )
+
+    monkeypatch.setattr(
+        infer_mod, "run_inference",
+        lambda *args,
+        **kwargs: pd.DataFrame({"prediction": [1]})
+    )
+
     monkeypatch.setattr(utils_mod, "save_csv", lambda *args, **kwargs: None)
     monkeypatch.setattr(utils_mod, "save_model", lambda *args, **kwargs: None)
     monkeypatch.setattr(utils_mod, "save_json", lambda *args, **kwargs: None)

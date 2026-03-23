@@ -15,7 +15,9 @@ def load_wandb_public_api():
         ) from exc
 
     if not hasattr(wandb_module, "Api"):
-        raise ImportError("Imported wandb module does not expose the Api client.")
+        raise ImportError(
+            "Imported wandb module does not expose the Api client."
+        )
 
     return wandb_module
 
@@ -28,7 +30,10 @@ def build_model_artifact_reference(
     wandb_cfg = config.get("wandb", {})
     if not isinstance(wandb_cfg, dict):
         raise ValueError(
-            "config.yaml: wandb section is required for model registry operations"
+            (
+                "config.yaml: wandb section is required for model registry "
+                "operations"
+            )
         )
 
     entity = str(wandb_cfg.get("entity", "")).strip()
@@ -42,8 +47,10 @@ def build_model_artifact_reference(
 
     if not project or not artifact_name:
         raise ValueError(
-            "config.yaml: wandb.project and wandb.model_artifact_name are required "
-            "for model registry operations"
+            (
+                "config.yaml: wandb.project and wandb.model_artifact_name are "
+                "required for model registry operations"
+            )
         )
 
     if entity:
@@ -72,7 +79,9 @@ def promote_model_artifact(
             str(wandb_cfg.get("production_alias", "prod")).strip() or "prod"
         )
 
-    resolved_target_alias = (target_alias or "").strip() or default_target_alias
+    resolved_target_alias = (
+        (target_alias or "").strip() or default_target_alias
+    )
     resolved_source_alias = source_alias.strip() or "latest"
 
     active_wandb = wandb_module or load_wandb_public_api()
@@ -91,9 +100,15 @@ def promote_model_artifact(
         current_aliases.append(resolved_target_alias)
         artifact.aliases = current_aliases
 
-    save = getattr(artifact, "save", None)
+    save = getattr(
+        artifact,
+        "save",
+        None,
+    )
     if not callable(save):
-        raise AttributeError("W&B artifact object does not expose a save() method.")
+        raise AttributeError(
+            "W&B artifact object does not expose a save() method."
+        )
 
     save()
 
