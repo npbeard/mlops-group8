@@ -159,7 +159,9 @@ def test_load_wandb_module_raises_when_api_missing(monkeypatch):
     class BrokenWandb:
         pass
 
-    monkeypatch.setattr(infer_mod.importlib, "import_module", lambda name: BrokenWandb())
+    monkeypatch.setattr(
+        infer_mod.importlib, "import_module", lambda name: BrokenWandb()
+    )
 
     with pytest.raises(ImportError, match="does not expose the Api client"):
         infer_mod._load_wandb_module()
@@ -170,7 +172,9 @@ def test_load_wandb_module_returns_valid_module(monkeypatch):
         class Api:
             pass
 
-    monkeypatch.setattr(infer_mod.importlib, "import_module", lambda name: ValidWandb())
+    monkeypatch.setattr(
+        infer_mod.importlib, "import_module", lambda name: ValidWandb()
+    )
 
     assert infer_mod._load_wandb_module() is not None
 
@@ -181,9 +185,17 @@ def test_build_wandb_artifact_reference_requires_dict_section():
 
 
 def test_build_wandb_artifact_reference_requires_project_and_name():
-    with pytest.raises(ValueError, match="wandb.project and wandb.model_artifact_name"):
+    with pytest.raises(
+        ValueError, match="wandb.project and wandb.model_artifact_name"
+    ):
         _build_wandb_artifact_reference(
-            {"wandb": {"entity": "group8", "project": "", "model_artifact_name": ""}}
+            {
+                "wandb": {
+                    "entity": "group8",
+                    "project": "",
+                    "model_artifact_name": "",
+                }
+            }
         )
 
 

@@ -1,8 +1,10 @@
 """
-Smoke-test the deployed FastAPI service and confirm it serves the promoted model.
+Smoke-test the deployed FastAPI service and confirm it serves the
+promoted model.
 
 Usage:
-python scripts/verify_deployment.py --base-url https://your-render-service.onrender.com
+python scripts/verify_deployment.py \
+    --base-url https://your-render-service.onrender.com
 """
 
 import argparse
@@ -10,11 +12,11 @@ import json
 from pathlib import Path
 import sys
 
+from src.deployment_verifier import DEFAULT_PREDICT_PAYLOAD, verify_deployment
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
-
-from src.deployment_verifier import DEFAULT_PREDICT_PAYLOAD, verify_deployment
 
 
 def _load_payload(path: str | None) -> dict:
@@ -30,7 +32,10 @@ def main() -> None:
     parser.add_argument(
         "--base-url",
         required=True,
-        help="Base deployment URL, for example https://your-render-service.onrender.com",
+        help=(
+            "Base deployment URL, for example "
+            "https://your-render-service.onrender.com"
+        ),
     )
     parser.add_argument(
         "--payload-file",

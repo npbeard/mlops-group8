@@ -31,8 +31,7 @@ RequestFn = Callable[[str, str, dict[str, Any] | None, float], tuple[int, Any]]
 
 
 def normalize_base_url(base_url: str) -> str:
-    cleaned = base_url.strip().rstrip("/")
-    if not cleaned:
+    if not (cleaned := base_url.strip().rstrip("/")):
         raise ValueError("Base deployment URL cannot be empty.")
     return cleaned
 
@@ -55,13 +54,16 @@ def request_json(
         body = json.dumps(payload).encode("utf-8")
         headers["Content-Type"] = "application/json"
 
-    req = request.Request(url, data=body, headers=headers, method=method.upper())
+    req = request.Request(
+        url, data=body, headers=headers, method=method.upper()
+    )
     try:
         with request.urlopen(req, timeout=timeout) as response:
             raw_body = response.read().decode("utf-8")
             parsed = _parse_response_body(raw_body)
             return int(getattr(response, "status", 200)), parsed
-    except error.HTTPError as exc:  # pragma: no cover - exercised via integration
+    # pragma: no cover - exercised via integration
+    except error.HTTPError as exc:
         raw_body = exc.read().decode("utf-8")
         parsed = _parse_response_body(raw_body)
         return exc.code, parsed
@@ -116,8 +118,12 @@ def verify_deployment(
         raise ValueError(f"/health returned status {health_status}")
     if health_body.get("status") != "ok":
         raise ValueError(f"/health did not report ok status: {health_body}")
-    if health_body.get("model_loaded") is not True:
-        raise ValueError(f"/health did not confirm a loaded model: {health_body}")
+    if (
+        health_body.get("model_loaded") is not True
+    ):
+        raise ValueError(
+            f"/health did not confirm a loaded model: {health_body}"
+        )
     if expected_source and health_body.get("model_source") != expected_source:
         raise ValueError(
             "Health endpoint reported an unexpected model source: "
@@ -133,9 +139,13 @@ def verify_deployment(
     if predict_status != 200:
         raise ValueError(f"/predict returned status {predict_status}")
 
-    predictions = predict_body.get("predictions")
+    predictions = predict_body.get(
+        "predictions"
+    )
     if not isinstance(predictions, list) or not predictions:
-        raise ValueError(f"/predict returned no usable predictions: {predict_body}")
+        raise ValueError(
+            f"/predict returned no usable predictions: {predict_body}"
+        )
     if expected_source and predict_body.get("model_source") != expected_source:
         raise ValueError(
             "Predict endpoint reported an unexpected model source: "

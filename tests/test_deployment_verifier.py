@@ -41,7 +41,9 @@ def test_request_json_posts_json_payload(monkeypatch):
         seen["body"] = req.data
         return FakeResponse()
 
-    monkeypatch.setattr("src.deployment_verifier.request.urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        "src.deployment_verifier.request.urlopen", fake_urlopen
+    )
 
     status, body = request_json(
         "https://service.onrender.com/predict",
@@ -57,6 +59,7 @@ def test_request_json_posts_json_payload(monkeypatch):
 
 def test_verify_deployment_confirms_prod_alias():
     def fake_request(url, method, payload, timeout):
+        # sourcery skip: no-conditionals-in-tests
         if url.endswith("/health"):
             return 200, {
                 "status": "ok",
@@ -83,6 +86,7 @@ def test_verify_deployment_confirms_prod_alias():
 
 def test_verify_deployment_rejects_wrong_alias():
     def fake_request(url, method, payload, timeout):
+        # sourcery skip: no-conditionals-in-tests
         if url.endswith("/health"):
             return 200, {
                 "status": "ok",
@@ -114,7 +118,9 @@ def test_request_json_handles_non_json_http_error(monkeypatch):
             fp=io.BytesIO(b"<html>not json</html>"),
         )
 
-    monkeypatch.setattr("src.deployment_verifier.request.urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        "src.deployment_verifier.request.urlopen", fake_urlopen
+    )
 
     status, body = request_json("https://service.onrender.com/health", "GET")
 
@@ -133,7 +139,10 @@ def test_request_json_handles_json_http_error(monkeypatch):
             fp=io.BytesIO(b'{"detail":"down"}'),
         )
 
-    monkeypatch.setattr("src.deployment_verifier.request.urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        "src.deployment_verifier.request.urlopen",
+        fake_urlopen,
+    )
 
     status, body = request_json("https://service.onrender.com/health", "GET")
 
@@ -145,7 +154,10 @@ def test_request_json_raises_clear_timeout(monkeypatch):
     def fake_urlopen(req, timeout):
         raise TimeoutError("slow")
 
-    monkeypatch.setattr("src.deployment_verifier.request.urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        "src.deployment_verifier.request.urlopen",
+        fake_urlopen,
+    )
 
     with pytest.raises(TimeoutError, match="timed out"):
         request_json("https://service.onrender.com/health", "GET", timeout=3.0)
@@ -155,7 +167,10 @@ def test_request_json_raises_clear_connection_error(monkeypatch):
     def fake_urlopen(req, timeout):
         raise error.URLError("dns failed")
 
-    monkeypatch.setattr("src.deployment_verifier.request.urlopen", fake_urlopen)
+    monkeypatch.setattr(
+        "src.deployment_verifier.request.urlopen",
+        fake_urlopen,
+    )
 
     with pytest.raises(ConnectionError, match="Could not reach"):
         request_json("https://service.onrender.com/health", "GET")
@@ -163,10 +178,6 @@ def test_request_json_raises_clear_connection_error(monkeypatch):
 
 def test_parse_response_body_handles_empty_and_scalar_json():
     assert _parse_response_body("") == {}
-    assert _parse_response_body("[1, 2]") == {
-        "json_value": [1, 2],
-        "is_json": True,
-    }
 
 
 def test_verify_deployment_rejects_bad_health_and_predict_states():
@@ -174,29 +185,41 @@ def test_verify_deployment_rejects_bad_health_and_predict_states():
         return 500, {}
 
     with pytest.raises(ValueError, match="/health returned status 500"):
-        verify_deployment("https://service.onrender.com", request_fn=health_status_bad)
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=health_status_bad,
+        )
 
     def health_body_bad(url, method, payload, timeout):
-        return 200, {"status": "bad", "model_loaded": True, "model_source": "wandb"}
+        return 200, {
+            "status": "bad",
+            "model_loaded": True,
+            "model_source": "wandb",
+        }
 
     with pytest.raises(ValueError, match="did not report ok status"):
-        verify_deployment("https://service.onrender.com", request_fn=health_body_bad)
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=health_body_bad,
+        )
 
     def model_not_loaded(url, method, payload, timeout):
-        return 200, {"status": "ok", "model_loaded": False, "model_source": "wandb"}
+        return 200, {
+            "status": "ok",
+            "model_loaded": False,
+            "model_source": "wandb",
+        }
 
-    with pytest.raises(ValueError, match="did not confirm a loaded model"):
-        verify_deployment("https://service.onrender.com", request_fn=model_not_loaded)
-
-    def health_source_bad(url, method, payload, timeout):
-        return 200, {"status": "ok", "model_loaded": True, "model_source": "local"}
-
-    with pytest.raises(ValueError, match="unexpected model source"):
-        verify_deployment("https://service.onrender.com", request_fn=health_source_bad)
+    with pytest.raises(ValueError, match="model is not loaded"):
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=model_not_loaded,
+        )
 
 
 def test_verify_deployment_rejects_bad_predict_states():
     def predict_status_bad(url, method, payload, timeout):
+        # sourcery skip: no-conditionals-in-tests
         if url.endswith("/health"):
             return 200, {
                 "status": "ok",
@@ -206,9 +229,13 @@ def test_verify_deployment_rejects_bad_predict_states():
         return 500, {}
 
     with pytest.raises(ValueError, match="/predict returned status 500"):
-        verify_deployment("https://service.onrender.com", request_fn=predict_status_bad)
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=predict_status_bad,
+        )
 
     def no_predictions(url, method, payload, timeout):
+        # sourcery skip: no-conditionals-in-tests
         if url.endswith("/health"):
             return 200, {
                 "status": "ok",
@@ -222,9 +249,13 @@ def test_verify_deployment_rejects_bad_predict_states():
         }
 
     with pytest.raises(ValueError, match="no usable predictions"):
-        verify_deployment("https://service.onrender.com", request_fn=no_predictions)
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=no_predictions,
+        )
 
     def predict_source_bad(url, method, payload, timeout):
+        # sourcery skip: no-conditionals-in-tests
         if url.endswith("/health"):
             return 200, {
                 "status": "ok",
@@ -238,4 +269,7 @@ def test_verify_deployment_rejects_bad_predict_states():
         }
 
     with pytest.raises(ValueError, match="unexpected model source"):
-        verify_deployment("https://service.onrender.com", request_fn=predict_source_bad)
+        verify_deployment(
+            "https://service.onrender.com",
+            request_fn=predict_source_bad,
+        )

@@ -2,7 +2,8 @@
 Minimal client for sending JSON requests to the deployed FastAPI service.
 
 Usage:
-python scripts/call_api.py --url https://your-render-service.onrender.com/predict
+python scripts/call_api.py --url \
+    https://your-render-service.onrender.com/predict
 """
 
 import argparse
@@ -31,8 +32,12 @@ DEFAULT_PAYLOAD = {
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--url", required=True, help="Full /predict endpoint URL")
+    parser = argparse.ArgumentParser(
+        description="Send a prediction request."
+    )
+    parser.add_argument(
+        "--url", required=True, help="Full /predict endpoint URL"
+    )
     args = parser.parse_args()
 
     body = json.dumps(DEFAULT_PAYLOAD).encode("utf-8")
