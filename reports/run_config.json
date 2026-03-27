@@ -47,6 +47,7 @@
     "target_column": "popularity"
   },
   "train": {
+    "baseline_model": "rf",
     "rf_max_depth": 10,
     "rf_n_estimators": 100,
     "seed": 42,
@@ -60,6 +61,12 @@
     "log_processed_data": true,
     "model_artifact_name": "spotify-popularity-pipeline",
     "production_alias": "prod",
-    "project": "spotify-sound-archetypes"
+    "project": "spotify-sound-archetypes",
+    "run_name": "final-rf-candidate",
+    "tags": [
+      "final-assignment",
+      "model-selection",
+      "rf"
+    ]
   }
 }

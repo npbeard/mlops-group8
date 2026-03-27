@@ -3,8 +3,9 @@ Module: Main Pipeline
 ---------------------
 Role: Orchestrate the entire flow
 (Load -> Clean -> Validate -> Train -> Evaluate).
-Usage: python -m src.main
+Usage: python -m src.main [--config path/to/config.yaml]
 """
+import argparse
 import logging
 import os
 import importlib
@@ -69,6 +70,21 @@ def _wandb_get_bool(
     if not isinstance(wandb_cfg, dict):
         return default
     return bool(wandb_cfg.get(key, default))
+
+
+def _wandb_get_list(
+    cfg: dict[str, Any],
+    key: str,
+) -> list[str]:
+    wandb_cfg = cfg.get("wandb")
+    if not isinstance(wandb_cfg, dict):
+        return []
+
+    value = wandb_cfg.get(key, [])
+    if not isinstance(value, list):
+        return []
+
+    return [str(item).strip() for item in value if str(item).strip()]
 
 
 def _load_wandb_module(project_root: Path):
@@ -187,10 +203,21 @@ def main(config: dict[str, Any] | None = None) -> int:
                     "W&B may prompt for authentication."
                 )
 
+            wandb_init_kwargs: dict[str, Any] = {
+                "project": wandb_project,
+                "config": cfg,
+                "job_type": "factory-pipeline",
+            }
+            run_name = _wandb_get_str(cfg, "run_name")
+            if run_name:
+                wandb_init_kwargs["name"] = run_name
+
+            tags = _wandb_get_list(cfg, "tags")
+            if tags:
+                wandb_init_kwargs["tags"] = tags
+
             wandb_run = wandb_module.init(
-                project=wandb_project,
-                config=cfg,
-                job_type="factory-pipeline",
+                **wandb_init_kwargs,
             )
             logger.info(
                 "Initialized W&B run | name=%s | project=%s",
@@ -421,5 +448,18 @@ def main(config: dict[str, Any] | None = None) -> int:
             wandb_module.finish()
 
 
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--config",
+        default="config.yaml",
+        help="Path to the project config file",
+    )
+    args, _ = parser.parse_known_args()
+    return args
+
+
 if __name__ == "__main__":
-    main()
+    args = _parse_args()
+    config_path = Path(args.config)
+    main(load_config(config_path))

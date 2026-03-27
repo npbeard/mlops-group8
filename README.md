@@ -137,6 +137,13 @@ The default expected path is `data/raw/SpotifyAudioFeaturesApril2019.csv`.
 python -m src.main
 ```
 
+For reproducible tracked experiments with alternate configs:
+
+```bash
+python -m src.main --config configs/experiments/rf_candidate.yaml
+python -m src.main --config configs/experiments/ridge_candidate.yaml
+```
+
 Outputs:
 - Clean dataset in `data/processed/clean.csv`
 - Model artifact in `models/model.joblib`
@@ -150,6 +157,33 @@ When W&B is enabled, `src.main` also logs:
 - Validation and test metrics
 - Model artifact
 - Optional processed-data and prediction artifacts
+
+## Simple Model Selection Experiment
+
+To satisfy the final-assignment model-registry requirement, we ran two simple tracked candidates in W&B and chose the best one using validation RMSE.
+
+Compared runs:
+- `final-rf-candidate`: validation RMSE `18.2369`, validation MAE `14.9154`, test RMSE `18.1460`, test MAE `14.8233`
+- `final-ridge-candidate`: validation RMSE `18.8577`, validation MAE `15.5427`, test RMSE `18.7476`, test MAE `15.4518`
+
+Decision rule:
+- Lower validation RMSE wins
+- Winner: `final-rf-candidate`
+
+W&B run links:
+- RF candidate: `https://wandb.ai/nicopbeard-ie-university/spotify-sound-archetypes/runs/y5fhbs7z`
+- Ridge candidate: `https://wandb.ai/nicopbeard-ie-university/spotify-sound-archetypes/runs/z96ptosr`
+
+Promotion result:
+- Promoted artifact family: `spotify-popularity-pipeline`
+- Promoted artifact version: `v4`
+- Production alias attached: `prod`
+
+Promotion command used:
+
+```bash
+python scripts/promote_model.py --source latest --target prod
+```
 
 ## Model Registry And Production Inference
 
