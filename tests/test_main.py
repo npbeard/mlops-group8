@@ -117,12 +117,14 @@ class FakeWandb:
         self.finished = []
         self.run = None
 
-    def init(self, project, config, job_type):
+    def init(self, project, config, job_type, name=None, tags=None):
         self.run = types.SimpleNamespace(name="fake-run")
         self.init_args = {
             "project": project,
             "config": config,
             "job_type": job_type,
+            "name": name,
+            "tags": tags,
         }
         return self.run
 
@@ -262,6 +264,12 @@ def test_wandb_helpers_handle_missing_or_empty_config():
         )
         is False
     )
+    assert main_mod._wandb_get_list({}, "tags") == []
+    assert main_mod._wandb_get_list({"wandb": {"tags": "not-a-list"}}, "tags") == []
+    assert main_mod._wandb_get_list(
+        {"wandb": {"tags": [" final ", "", "prod"]}},
+        "tags",
+    ) == ["final", "prod"]
 
 
 def test_load_wandb_module_returns_none_when_missing(monkeypatch):
@@ -599,6 +607,64 @@ def test_main_wandb_logs_artifacts_and_predictions(tmp_path, monkeypatch):
     assert any("metrics/val/rmse" in payload for payload in fake_wandb.logged)
     assert len(fake_wandb.artifacts) == 3
     assert fake_wandb.finished == [None]
+
+
+def test_main_passes_wandb_run_name_and_tags(tmp_path, monkeypatch):
+    settings = _base_settings(tmp_path, wandb_enabled=True)
+    settings["wandb"]["run_name"] = "final-rf-candidate"
+    settings["wandb"]["tags"] = ["final-assignment", "model-selection"]
+    df = _tiny_df()
+    fake_wandb = FakeWandb()
+
+    monkeypatch.setenv("WANDB_API_KEY", "token")
+    monkeypatch.setattr(
+        main_mod,
+        "_load_wandb_module",
+        lambda project_root: fake_wandb,
+    )
+    monkeypatch.setattr(main_mod, "load_dotenv", None)
+    monkeypatch.setattr(main_mod, "configure_logging", lambda **kwargs: None)
+    monkeypatch.setattr(main_mod.load_data, "load_raw_data", lambda path: df)
+    monkeypatch.setattr(
+        main_mod.clean_data,
+        "clean_dataframe",
+        lambda frame, target: frame,
+    )
+    monkeypatch.setattr(
+        main_mod.validate,
+        "validate_dataframe",
+        lambda *args, **kwargs: None,
+    )
+    monkeypatch.setattr(
+        main_mod.features,
+        "get_feature_preprocessor",
+        lambda **kwargs: object(),
+    )
+    monkeypatch.setattr(
+        main_mod.train,
+        "train_model",
+        lambda *args, **kwargs: DummyModel(),
+    )
+    monkeypatch.setattr(
+        main_mod.evaluate,
+        "evaluate_model",
+        lambda *args, **kwargs: {"rmse": 1.0, "mae": 0.5},
+    )
+    monkeypatch.setattr(
+        main_mod.infer,
+        "run_inference",
+        lambda *args, **kwargs: pd.DataFrame({"prediction": [1]}),
+    )
+    monkeypatch.setattr(main_mod, "save_csv", lambda *args, **kwargs: None)
+    monkeypatch.setattr(main_mod, "save_model", lambda *args, **kwargs: None)
+    monkeypatch.setattr(main_mod, "save_json", lambda *args, **kwargs: None)
+
+    assert main_mod.main(settings) == 0
+    assert fake_wandb.init_args["name"] == "final-rf-candidate"
+    assert fake_wandb.init_args["tags"] == [
+        "final-assignment",
+        "model-selection",
+    ]
 
 
 def test_main_finishes_wandb_with_error_code_on_failure(tmp_path, monkeypatch):

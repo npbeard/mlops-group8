@@ -1,0 +1,65 @@
+project:
+  name: "Spotify Sound Archetypes"
+  problem_type: "regression"
+  target_column: "popularity"
+
+paths:
+  raw_data: "data/raw/SpotifyAudioFeaturesApril2019.csv"
+  clean_data: "data/processed/clean.csv"
+  model_path: "models/experiments/rf_candidate.joblib"
+  report_path: "reports/experiments/rf_predictions.csv"
+  metrics_path: "reports/experiments/rf_metrics.json"
+  run_config_path: "reports/experiments/rf_run_config.json"
+  log_file: "logs/experiments/rf_pipeline.log"
+  artifact_cache_dir: ".artifacts"
+
+train:
+  test_size: 0.2
+  val_size: 0.2
+  seed: 42
+  baseline_model: "rf"
+  rf_n_estimators: 100
+  rf_max_depth: 10
+
+features:
+  quantile_bin:
+    - "duration_ms"
+    - "tempo"
+  categorical_onehot:
+    - "key"
+    - "mode"
+  numeric_passthrough:
+    - "acousticness"
+    - "danceability"
+    - "energy"
+    - "instrumentalness"
+    - "liveness"
+    - "loudness"
+    - "speechiness"
+    - "valence"
+  n_bins: 5
+
+logging:
+  level: "INFO"
+  format: "text"
+
+wandb:
+  enabled: true
+  entity: "nicopbeard-ie-university"
+  project: "spotify-sound-archetypes"
+  model_artifact_name: "spotify-popularity-pipeline"
+  production_alias: "prod"
+  log_processed_data: true
+  log_predictions: true
+  run_name: "final-rf-candidate"
+  tags:
+    - "final-assignment"
+    - "model-selection"
+    - "rf"
+
+inference:
+  source: "wandb"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
